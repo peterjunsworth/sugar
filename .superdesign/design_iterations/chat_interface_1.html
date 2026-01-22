@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Sugar Tracker - Chat Interface</title>
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="./default_ui_theme.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* iOS & Android Safe Area Support */
+    :root {
+      --sat: env(safe-area-inset-top);
+      --sar: env(safe-area-inset-right);
+      --sab: env(safe-area-inset-bottom);
+      --sal: env(safe-area-inset-left);
+    }
+
+    /* Mobile-First Layout */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      /* iOS Safari viewport fix */
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      /* iOS Safari 100vh fix */
+      height: -webkit-fill-available;
+      background: var(--background);
+      position: relative;
+    }
+
+    /* Responsive Content Container */
+    .content-wrapper {
+      max-width: 100%;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Mobile: Full width */
+    @media (max-width: 767px) {
+      .content-wrapper {
+        max-width: 100%;
+      }
+    }
+
+    /* Tablet: 600px max */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .content-wrapper {
+        max-width: 600px;
+      }
+    }
+
+    /* Desktop: 900px max */
+    @media (min-width: 1024px) {
+      .content-wrapper {
+        max-width: 900px;
+      }
+    }
+
+    /* Header Bar */
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      min-height: 60px;
+      width: 100%;
+      /* Safe area for iOS notch */
+      padding-top: calc(var(--spacing-md) + env(safe-area-inset-top));
+    }
+
+    .header-bar .content-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0 var(--spacing-lg);
+    }
+
+    @media (max-width: 767px) {
+      .header-bar .content-wrapper {
+        padding: 0;
+      }
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .header-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    .header-right {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+
+    /* Improved Header Buttons */
+    .header-btn {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .header-btn:hover {
+      background: var(--surface-hover);
+      color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .header-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Ripple effect on click */
+    .header-btn::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--primary);
+      opacity: 0;
+      transform: scale(0);
+      transition: transform 0.4s, opacity 0.3s;
+    }
+
+    .header-btn:active::after {
+      transform: scale(1.2);
+      opacity: 0.3;
+      transition: 0s;
+    }
+
+    /* Glucose Hero Card */
+    .glucose-hero {
+      background: linear-gradient(135deg, var(--p-primary-600), var(--p-primary-400));
+      padding: var(--spacing-xl);
+      margin: var(--spacing-lg);
+      border-radius: calc(var(--radius) + 8px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .glucose-value {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .glucose-unit {
+      font-size: var(--font-size-xl);
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .glucose-status {
+      font-size: var(--font-size-base);
+      color: rgba(255, 255, 255, 0.95);
+      margin-top: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .ai-suggestion-btn {
+      margin-top: var(--spacing-lg);
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--radius);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ai-suggestion-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Quick Metrics Row */
+    .quick-metrics {
+      display: flex;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-lg);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .quick-metrics::-webkit-scrollbar {
+      display: none;
+    }
+
+    .metric-card {
+      min-width: 140px;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      transition: all 0.2s;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-icon {
+      width: 2rem;
+      height: 2rem;
+      padding: var(--spacing-xs);
+      border-radius: calc(var(--radius) - 2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .metric-icon.food {
+      background: var(--accent-coral-100);
+      color: var(--accent-coral-600);
+    }
+
+    .metric-icon.exercise {
+      background: var(--p-primary-100);
+      color: var(--p-primary-600);
+    }
+
+    .metric-icon.med {
+      background: var(--accent-purple-100);
+      color: var(--accent-purple-600);
+    }
+
+    .metric-label {
+      font-size: var(--font-size-xs);
+      color: var(--muted-foreground);
+    }
+
+    .metric-value {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    /* Chat Container */
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+      /* Prevent content from going under input bar */
+      padding-bottom: calc(var(--spacing-lg) + 80px);
+      /* Enable momentum scrolling on iOS */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Chat Messages */
+    .message {
+      display: flex;
+      gap: var(--spacing-md);
+      animation: messageSlideIn 0.3s ease-out;
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .message-avatar.ai {
+      background: linear-gradient(135deg, var(--accent-purple-500), var(--accent-purple-400));
+      color: white;
+    }
+
+    .message-avatar.user {
+      background: var(--p-primary-500);
+      color: white;
+    }
+
+    .message-content {
+      max-width: 75%;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-md);
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
+    }
+
+    .message.user .message-content {
+      background: var(--p-primary-500);
+      color: white;
+      border: none;
+    }
+
+    .message-time {
+      font-size: var(--font-size-xs);
+      color: var(--muted-foreground);
+      margin-top: var(--spacing-xs);
+    }
+
+    /* Impact Card in Chat */
+    .impact-card {
+      background: var(--surface-section);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-md);
+      margin-top: var(--spacing-sm);
+    }
+
+    .impact-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .impact-title {
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    .impact-chart {
+      height: 80px;
+      background: linear-gradient(to right,
+        transparent 0%,
+        var(--p-primary-200) 50%,
+        transparent 100%);
+      border-radius: calc(var(--radius) - 2px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .impact-chart::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 10px,
+        var(--surface-border) 10px,
+        var(--surface-border) 11px
+      );
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+      display: flex;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-md);
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      width: fit-content;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-purple-400);
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    /* Input Bar */
+    .input-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-lg);
+      background: var(--surface-card);
+      border-top: 1px solid var(--surface-border);
+      /* Fixed at bottom for mobile */
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      /* Safe area for iOS notch/home indicator */
+      padding-bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom));
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    .chat-input {
+      width: 100%;
+      background: var(--surface-section);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-md) var(--spacing-lg);
+      padding-right: 3rem;
+      color: var(--foreground);
+      font-size: var(--font-size-sm);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: var(--p-primary-500);
+      box-shadow: var(--focus-ring);
+      transform: translateY(-2px);
+    }
+
+    /* Prevent zoom on focus for iOS */
+    @media (max-width: 767px) {
+      .chat-input {
+        font-size: 16px; /* Prevents iOS zoom */
+      }
+    }
+
+    .input-actions {
+      position: absolute;
+      right: var(--spacing-sm);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+
+    .input-action-btn {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: calc(var(--radius) - 2px);
+      background: transparent;
+      border: none;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .input-action-btn:hover {
+      background: var(--surface-hover);
+      color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    .send-btn {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      background: var(--p-primary-500);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .send-btn:hover {
+      background: var(--p-primary-600);
+      transform: scale(1.05);
+    }
+
+    .send-btn:active {
+      transform: scale(0.95) rotate(360deg);
+    }
+
+    /* Floating Action Button */
+    .fab {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-coral-500), var(--accent-coral-400));
+      border: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 100;
+    }
+
+    .fab:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Animations */
+    @keyframes messageSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Pulse Animation for Glucose Card */
+    @keyframes glucosePulse {
+      0%, 100% {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      }
+      50% {
+        box-shadow: 0 8px 24px rgba(20, 184, 166, 0.4);
+      }
+    }
+
+    .glucose-hero.pulse {
+      animation: glucosePulse 2s infinite;
+    }
+
+    /* Sidebar Menu */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 998;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      max-width: 80%;
+      background: var(--surface-card);
+      border-right: 1px solid var(--surface-border);
+      z-index: 999;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      padding: var(--spacing-xl) var(--spacing-lg);
+      border-bottom: 1px solid var(--surface-border);
+    }
+
+    .sidebar-profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .sidebar-avatar {
+      width: 3rem;
+      height: 3rem;
+      background: linear-gradient(135deg, var(--p-primary-500), var(--p-primary-400));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: var(--font-size-lg);
+      font-weight: 700;
+    }
+
+    .sidebar-profile-info h3 {
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: 2px;
+    }
+
+    .sidebar-profile-info p {
+      font-size: var(--font-size-xs);
+      color: var(--muted-foreground);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: var(--spacing-lg) 0;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md) var(--spacing-lg);
+      color: var(--foreground);
+      text-decoration: none;
+      transition: all 0.2s;
+      font-size: var(--font-size-base);
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: var(--surface-hover);
+    }
+
+    .nav-item.active {
+      background: color-mix(in srgb, var(--primary), transparent 90%);
+      color: var(--primary);
+      border-right: 3px solid var(--primary);
+    }
+
+    .nav-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: inherit;
+    }
+
+    .sidebar-footer {
+      padding: var(--spacing-lg);
+      border-top: 1px solid var(--surface-border);
+    }
+
+    .theme-toggle-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--surface-section);
+      border: none;
+      border-radius: var(--radius);
+      color: var(--foreground);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-profile">
+          <div class="sidebar-avatar">JD</div>
+          <div class="sidebar-profile-info">
+            <h3>John Doe</h3>
+            <p>john@example.com</p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="chat_interface_1.html" class="nav-item active">
+          <i data-lucide="home" class="nav-icon"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="history_1.html" class="nav-item">
+          <i data-lucide="clock" class="nav-icon"></i>
+          <span>History</span>
+        </a>
+        <a href="profile_1.html" class="nav-item">
+          <i data-lucide="user" class="nav-icon"></i>
+          <span>Profile</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i data-lucide="settings" class="nav-icon"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" id="sidebarThemeToggle">
+          <span>Dark Mode</span>
+          <i data-lucide="moon" class="icon" id="sidebarThemeIcon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Header Bar -->
+    <div class="header-bar">
+      <div class="content-wrapper">
+        <div class="header-left">
+          <button class="header-btn" aria-label="Menu" id="menuBtn">
+            <i data-lucide="menu" class="icon"></i>
+          </button>
+          <h1 class="header-title">Sugar Tracker</h1>
+        </div>
+        <div class="header-right">
+          <button class="header-btn" aria-label="Notifications">
+            <i data-lucide="bell" class="icon"></i>
+          </button>
+          <button class="header-btn" aria-label="Toggle theme" id="headerThemeToggle">
+            <i data-lucide="moon" class="icon" id="headerThemeIcon"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Wrapper -->
+    <div class="content-wrapper" style="flex: 1; display: flex; flex-direction: column;">
+      <!-- Glucose Hero Card -->
+      <div class="glucose-hero">
+      <div class="glucose-value">
+        123.5 <span class="glucose-unit">mg/dL</span>
+      </div>
+      <div class="glucose-status">
+        <i data-lucide="check-circle" class="icon-lg"></i>
+        <span>You're in healthy range</span>
+      </div>
+      <button class="ai-suggestion-btn">
+        <i data-lucide="sparkles" class="icon"></i>
+        <span>8 AI Suggestions</span>
+      </button>
+    </div>
+
+    <!-- Quick Metrics -->
+    <div class="quick-metrics">
+      <div class="metric-card">
+        <div class="metric-icon food">
+          <i data-lucide="utensils" class="icon"></i>
+        </div>
+        <div class="metric-label">Last Meal</div>
+        <div class="metric-value">+45 mg/dL</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon exercise">
+          <i data-lucide="activity" class="icon"></i>
+        </div>
+        <div class="metric-label">Exercise</div>
+        <div class="metric-value">-15 mg/dL</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon med">
+          <i data-lucide="pill" class="icon"></i>
+        </div>
+        <div class="metric-label">Medication</div>
+        <div class="metric-value">On time</div>
+      </div>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="chat-container">
+      <!-- AI Message -->
+      <div class="message ai">
+        <div class="message-avatar ai">
+          <i data-lucide="bot" class="icon-lg"></i>
+        </div>
+        <div>
+          <div class="message-content">
+            Good morning! How are you feeling today?
+          </div>
+          <div class="message-time">9:41 AM</div>
+        </div>
+      </div>
+
+      <!-- User Message -->
+      <div class="message user">
+        <div class="message-avatar user">
+          <i data-lucide="user" class="icon-lg"></i>
+        </div>
+        <div>
+          <div class="message-content">
+            I just had pizza for lunch 🍕
+          </div>
+          <div class="message-time">12:30 PM</div>
+        </div>
+      </div>
+
+      <!-- AI Response with Impact Card -->
+      <div class="message ai">
+        <div class="message-avatar ai">
+          <i data-lucide="bot" class="icon-lg"></i>
+        </div>
+        <div style="max-width: 85%;">
+          <div class="message-content">
+            I see you had pizza! Based on your glucose history, here's the expected impact:
+            <div class="impact-card">
+              <div class="impact-header">
+                <span class="impact-title">Glucose Impact</span>
+                <span class="badge badge-warning">+50-60 mg/dL</span>
+              </div>
+              <div class="impact-chart"></div>
+              <div style="margin-top: var(--spacing-sm); font-size: var(--font-size-xs); color: var(--muted-foreground);">
+                Peak expected in 45-60 minutes
+              </div>
+            </div>
+            <div style="margin-top: var(--spacing-md); font-size: var(--font-size-sm);">
+              💡 <strong>Recommendation:</strong> Consider a 20-minute walk to help manage the spike.
+            </div>
+          </div>
+          <div class="message-time">12:31 PM</div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="message ai">
+        <div class="message-avatar ai">
+          <i data-lucide="bot" class="icon-lg"></i>
+        </div>
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+      <button class="btn-icon btn-ghost" aria-label="Attach photo">
+        <i data-lucide="camera" class="icon-lg"></i>
+      </button>
+      <div class="input-wrapper">
+        <input
+          type="text"
+          class="chat-input"
+          placeholder="Ask me anything or log your meal..."
+          aria-label="Chat input"
+        />
+        <div class="input-actions">
+          <button class="input-action-btn" aria-label="Voice input">
+            <i data-lucide="mic" class="icon"></i>
+          </button>
+        </div>
+      </div>
+      <button class="send-btn" aria-label="Send message">
+        <i data-lucide="send" class="icon"></i>
+      </button>
+    </div>
+    </div>
+    <!-- End Content Wrapper -->
+
+    <!-- Floating Action Button -->
+    <button class="fab" aria-label="Quick actions">
+      <i data-lucide="plus" class="icon-xl"></i>
+    </button>
+  </div>
+
+  <script>
+    // iOS viewport height fix
+    function setVH() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+
+    // Update app container height with CSS variable
+    const style = document.createElement('style');
+    style.textContent = `
+      .app-container {
+        height: calc(var(--vh, 1vh) * 100);
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Sidebar toggle
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('active');
+      sidebarOverlay.classList.toggle('active');
+    }
+
+    menuBtn.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', toggleSidebar);
+
+    // Theme toggle (sidebar)
+    const sidebarThemeToggle = document.getElementById('sidebarThemeToggle');
+    const sidebarThemeIcon = document.getElementById('sidebarThemeIcon');
+    const headerThemeToggle = document.getElementById('headerThemeToggle');
+    const headerThemeIcon = document.getElementById('headerThemeIcon');
+    const html = document.documentElement;
+
+    function updateThemeUI() {
+      const isDark = html.classList.contains('dark');
+      sidebarThemeIcon.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
+      headerThemeIcon.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
+      sidebarThemeToggle.querySelector('span').textContent = isDark ? 'Dark Mode' : 'Light Mode';
+      lucide.createIcons();
+    }
+
+    sidebarThemeToggle.addEventListener('click', function() {
+      html.classList.toggle('dark');
+      updateThemeUI();
+    });
+
+    headerThemeToggle.addEventListener('click', function() {
+      html.classList.toggle('dark');
+      updateThemeUI();
+    });
+
+    // Initialize theme UI
+    updateThemeUI();
+
+    // Simple interactions
+    document.querySelector('.send-btn').addEventListener('click', function() {
+      const input = document.querySelector('.chat-input');
+      if (input.value.trim()) {
+        console.log('Sending message:', input.value);
+        input.value = '';
+      }
+    });
+
+    document.querySelector('.chat-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.querySelector('.send-btn').click();
+      }
+    });
+
+    // FAB interaction
+    document.querySelector('.fab').addEventListener('click', function() {
+      alert('Quick actions menu would open here:\n• Log Meal\n• Log Exercise\n• Manual Glucose Entry\n• Ask AI for Advice');
+    });
+  </script>
+</body>
+</html>

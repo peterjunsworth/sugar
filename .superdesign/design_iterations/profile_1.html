@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - Sugar Tracker</title>
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="./default_ui_theme.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: var(--background);
+    }
+
+    /* Responsive Content Container */
+    .content-wrapper {
+      max-width: 100%;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Mobile: Full width */
+    @media (max-width: 767px) {
+      .content-wrapper {
+        max-width: 100%;
+      }
+    }
+
+    /* Tablet: 600px max */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .content-wrapper {
+        max-width: 600px;
+      }
+    }
+
+    /* Desktop: 900px max */
+    @media (min-width: 1024px) {
+      .content-wrapper {
+        max-width: 900px;
+      }
+    }
+
+    /* Header */
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) 0;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      min-height: 60px;
+      width: 100%;
+    }
+
+    .header-bar .content-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0 var(--spacing-lg);
+    }
+
+    @media (max-width: 767px) {
+      .header-bar .content-wrapper {
+        padding: 0 var(--spacing-lg);
+      }
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .header-btn {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .header-btn:hover {
+      background: var(--surface-hover);
+      color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .header-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    .header-right {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+
+    /* Profile Header */
+    .profile-header {
+      background: linear-gradient(135deg, var(--p-primary-600), var(--p-primary-400));
+      padding: var(--spacing-2xl) var(--spacing-xl);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-lg);
+    }
+
+    .avatar {
+      width: 5rem;
+      height: 5rem;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--p-primary-600);
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-name {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: white;
+      text-align: center;
+    }
+
+    .profile-email {
+      font-size: var(--font-size-sm);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Content */
+    .content-container {
+      flex: 1;
+      padding: var(--spacing-lg);
+    }
+
+    .section {
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .section-title {
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: var(--muted-foreground);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--spacing-md);
+      padding: 0 var(--spacing-sm);
+    }
+
+    .settings-list {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--surface-border);
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item:hover {
+      background: var(--surface-hover);
+    }
+
+    .settings-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: color-mix(in srgb, var(--primary), transparent 90%);
+      border-radius: calc(var(--radius) - 2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .settings-content {
+      flex: 1;
+    }
+
+    .settings-title {
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: 2px;
+    }
+
+    .settings-description {
+      font-size: var(--font-size-sm);
+      color: var(--muted-foreground);
+    }
+
+    .settings-value {
+      font-size: var(--font-size-sm);
+      color: var(--muted-foreground);
+      flex-shrink: 0;
+    }
+
+    .settings-chevron {
+      color: var(--muted-foreground);
+      flex-shrink: 0;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 3rem;
+      height: 1.75rem;
+      background: var(--surface-border);
+      border-radius: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+
+    .toggle-knob {
+      position: absolute;
+      top: 0.25rem;
+      left: 0.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-switch.active .toggle-knob {
+      transform: translateX(1.25rem);
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-lg);
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--muted-foreground);
+    }
+
+    /* Danger Zone */
+    .danger-item {
+      color: var(--danger-red);
+    }
+
+    .danger-item .settings-icon {
+      background: color-mix(in srgb, var(--danger-red), transparent 90%);
+      color: var(--danger-red);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="header-bar">
+      <div class="content-wrapper">
+        <div class="header-left">
+          <a href="chat_interface_1.html" class="header-btn">
+            <i data-lucide="arrow-left" class="icon"></i>
+          </a>
+          <h1 class="header-title">Profile</h1>
+        </div>
+        <div class="header-right">
+          <button class="header-btn" id="themeToggle">
+            <i data-lucide="moon" class="icon" id="themeIcon"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="content-wrapper">
+      <div class="avatar">JD</div>
+      <div>
+        <div class="profile-name">John Doe</div>
+        <div class="profile-email">john@example.com</div>
+      </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content-container">
+      <div class="content-wrapper">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">28</div>
+          <div class="stat-label">Days Active</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">92%</div>
+          <div class="stat-label">In Range</div>
+        </div>
+      </div>
+
+      <!-- Personal Info Section -->
+      <div class="section">
+        <div class="section-title">Personal Information</div>
+        <div class="settings-list">
+          <a href="#" class="settings-item">
+            <div class="settings-icon">
+              <i data-lucide="user" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Full Name</div>
+              <div class="settings-description">John Doe</div>
+            </div>
+            <i data-lucide="chevron-right" class="icon settings-chevron"></i>
+          </a>
+
+          <a href="#" class="settings-item">
+            <div class="settings-icon">
+              <i data-lucide="calendar" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Age & Weight</div>
+              <div class="settings-description">35 years, 75 kg</div>
+            </div>
+            <i data-lucide="chevron-right" class="icon settings-chevron"></i>
+          </a>
+
+          <a href="#" class="settings-item">
+            <div class="settings-icon">
+              <i data-lucide="heart-pulse" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Diabetes Type</div>
+              <div class="settings-description">Type 2</div>
+            </div>
+            <i data-lucide="chevron-right" class="icon settings-chevron"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Health Settings Section -->
+      <div class="section">
+        <div class="section-title">Health Settings</div>
+        <div class="settings-list">
+          <a href="#" class="settings-item">
+            <div class="settings-icon">
+              <i data-lucide="target" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Glucose Targets</div>
+              <div class="settings-description">70 - 180 mg/dL</div>
+            </div>
+            <i data-lucide="chevron-right" class="icon settings-chevron"></i>
+          </a>
+
+          <a href="#" class="settings-item">
+            <div class="settings-icon">
+              <i data-lucide="watch" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Connected Devices</div>
+              <div class="settings-description">Dexcom G6</div>
+            </div>
+            <i data-lucide="chevron-right" class="icon settings-chevron"></i>
+          </a>
+
+          <div class="settings-item" onclick="toggleNotifications()">
+            <div class="settings-icon">
+              <i data-lucide="bell" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Notifications</div>
+              <div class="settings-description">Alerts for high/low levels</div>
+            </div>
+            <div class="toggle-switch active" id="notificationsToggle">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Settings Section -->
+      <div class="section">
+        <div class="section-title">App Settings</div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="toggleTheme()">
+            <div class="settings-icon">
+              <i data-lucide="moon" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Dark Mode</div>
+              <div class="settings-description">Use dark theme</div>
+            </div>
+            <div class="toggle-switch active" id="themeSwitch">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+
+          <a href="#" class="settings-item">
+            <div class="settings-icon">
+              <i data-lucide="shield" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Privacy & Security</div>
+              <div class="settings-description">Data permissions</div>
+            </div>
+            <i data-lucide="chevron-right" class="icon settings-chevron"></i>
+          </a>
+
+          <a href="#" class="settings-item">
+            <div class="settings-icon">
+              <i data-lucide="life-buoy" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Help & Support</div>
+              <div class="settings-description">FAQs and contact</div>
+            </div>
+            <i data-lucide="chevron-right" class="icon settings-chevron"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Danger Zone Section -->
+      <div class="section">
+        <div class="section-title">Account</div>
+        <div class="settings-list">
+          <a href="landing_1.html" class="settings-item danger-item">
+            <div class="settings-icon">
+              <i data-lucide="log-out" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Log Out</div>
+            </div>
+            <i data-lucide="chevron-right" class="icon settings-chevron"></i>
+          </a>
+
+          <a href="#" class="settings-item danger-item">
+            <div class="settings-icon">
+              <i data-lucide="trash-2" class="icon"></i>
+            </div>
+            <div class="settings-content">
+              <div class="settings-title">Delete Account</div>
+            </div>
+            <i data-lucide="chevron-right" class="icon settings-chevron"></i>
+          </a>
+        </div>
+      </div>
+      </div>
+      <!-- End content-wrapper -->
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Theme toggle (header)
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeSwitch = document.getElementById('themeSwitch');
+    const html = document.documentElement;
+
+    function updateThemeUI() {
+      const isDark = html.classList.contains('dark');
+      themeIcon.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
+      if (isDark) {
+        themeSwitch.classList.add('active');
+      } else {
+        themeSwitch.classList.remove('active');
+      }
+      lucide.createIcons();
+    }
+
+    themeToggle.addEventListener('click', function() {
+      html.classList.toggle('dark');
+      updateThemeUI();
+    });
+
+    // Theme toggle (settings)
+    function toggleTheme() {
+      html.classList.toggle('dark');
+      updateThemeUI();
+    }
+
+    // Notifications toggle
+    function toggleNotifications() {
+      const toggle = document.getElementById('notificationsToggle');
+      toggle.classList.toggle('active');
+    }
+
+    // Initialize theme UI
+    updateThemeUI();
+  </script>
+</body>
+</html>

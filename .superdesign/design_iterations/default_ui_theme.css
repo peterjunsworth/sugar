@@ -1,0 +1,622 @@
+/* ========================================
+   Dual Theme UI Framework (Light & Dark Mode)
+   Sugar Tracking App - Glucose Harmony Theme
+   ======================================== */
+
+/* ========================================
+   CSS Variables & Theme
+
+   USAGE:
+   - Light Mode (default): <html> or <html class="">
+   - Dark Mode: <html class="dark">
+
+   Simply add/remove the "dark" class on the <html> element to toggle themes.
+   ======================================== */
+
+/* ========================================
+   Shared Constants (Theme-Independent)
+   ======================================== */
+:root {
+  /* Sugar App Health Palette - Teal/Green Primary */
+  --p-primary-50: #f0fdfa;
+  --p-primary-100: #ccfbf1;
+  --p-primary-200: #99f6e4;
+  --p-primary-300: #5eead4;
+  --p-primary-400: #2dd4bf;
+  --p-primary-500: #14b8a6;
+  --p-primary-600: #0d9488;
+  --p-primary-700: #0f766e;
+  --p-primary-800: #115e59;
+  --p-primary-900: #134e4a;
+  --p-primary-950: #042f2e;
+
+  /* Accent Colors - Food/Warning/AI */
+  --accent-coral-50: #fff7ed;
+  --accent-coral-100: #ffedd5;
+  --accent-coral-200: #fed7aa;
+  --accent-coral-300: #fdba74;
+  --accent-coral-400: #fb923c;
+  --accent-coral-500: #f97316;
+  --accent-coral-600: #ea580c;
+  --accent-coral-700: #c2410c;
+
+  --accent-purple-50: #faf5ff;
+  --accent-purple-100: #f3e8ff;
+  --accent-purple-200: #e9d5ff;
+  --accent-purple-300: #d8b4fe;
+  --accent-purple-400: #c084fc;
+  --accent-purple-500: #a855f7;
+  --accent-purple-600: #9333ea;
+  --accent-purple-700: #7e22ce;
+
+  --success-green: #10b981;
+  --warning-amber: #f59e0b;
+  --danger-red: #ef4444;
+
+  /* Spacing System - Same for both themes */
+  --radius: 1rem;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  --spacing-2xl: 2rem;
+  --spacing-3xl: 3rem;
+
+  /* Typography - Same for both themes */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  /* ========================================
+     LIGHT MODE (Default Theme)
+     ======================================== */
+
+  /* Light Mode Surfaces */
+  --surface-ground: #f0fdf4;
+  --surface-section: #ffffff;
+  --surface-card: #ffffff;
+  --surface-overlay: #ffffff;
+  --surface-border: #d1fae5;
+  --surface-hover: #ecfdf5;
+  --focus-ring: 0 0 0 0.25rem color-mix(in srgb, var(--p-primary-500), transparent 80%);
+
+  /* Light Mode Core Tokens */
+  --background: var(--surface-ground);
+  --foreground: #0f172a;
+  --card: var(--surface-card);
+  --card-foreground: #0f172a;
+
+  --primary: var(--p-primary-500);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--accent-purple-500);
+  --secondary-foreground: #ffffff;
+  --accent: var(--accent-coral-500);
+  --accent-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+
+  --destructive: oklch(0.704 0.191 22.216);
+
+  --border: var(--surface-border);
+  --input: #ffffff;
+  --ring: var(--p-primary-600);
+
+  --primary-color: var(--p-primary-600);
+  --primary-color-text: #ffffff;
+
+  /* Light Mode Text Colors */
+  --text-color: #0f172a;
+  --text-color-secondary: #64748b;
+}
+
+/* ========================================
+   DARK MODE Theme
+   Add class="dark" to <html> element to enable
+   ======================================== */
+html.dark {
+  /* Dark Mode Surfaces */
+  --surface-ground: #0a0f0e;
+  --surface-section: #1a2623;
+  --surface-card: #1a2623;
+  --surface-overlay: #1a2623;
+  --surface-border: #2d3f3b;
+  --surface-hover: #243330;
+  --focus-ring: 0 0 0 0.25rem color-mix(in srgb, var(--p-primary-400), transparent 70%);
+
+  /* Dark Mode Core Tokens */
+  --background: var(--surface-ground);
+  --foreground: #ffffff;
+  --card: var(--surface-card);
+  --card-foreground: #ffffff;
+
+  --primary: var(--p-primary-400);
+  --primary-foreground: #0a0f0e;
+
+  --secondary: var(--accent-purple-400);
+  --secondary-foreground: #0a0f0e;
+  --accent: var(--accent-coral-400);
+  --accent-foreground: #0a0f0e;
+  --muted: #1a2623;
+  --muted-foreground: var(--p-primary-200);
+
+  --destructive: oklch(0.704 0.191 22.216);
+
+  --border: var(--surface-border);
+  --input: color-mix(in srgb, var(--surface-border), #ffffff 8%);
+  --ring: var(--p-primary-600);
+
+  --primary-color: var(--p-primary-500);
+  --primary-color-text: #ffffff;
+
+  /* Dark Mode Text Colors */
+  --text-color: #ffffff;
+  --text-color-secondary: var(--p-primary-200);
+}
+
+/* ========================================
+   Base Styles
+   ======================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* ========================================
+   Layout Components
+   ======================================== */
+.container {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+}
+
+.container-sm {
+  max-width: 42rem;
+}
+
+.container-lg {
+  max-width: 80rem;
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.grid-cols-auto {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.gap-sm {
+  gap: var(--spacing-sm);
+}
+.gap-md {
+  gap: var(--spacing-md);
+}
+.gap-lg {
+  gap: var(--spacing-lg);
+}
+.gap-xl {
+  gap: var(--spacing-xl);
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* ========================================
+   Card Components
+   ======================================== */
+.card {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--surface-border);
+  border-radius: calc(var(--radius) + 4px);
+  padding: var(--spacing-xl);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* ========================================
+   Button Components
+   ======================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  white-space: nowrap;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  min-height: 2.25rem;
+  outline: none;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  background-color: var(--p-primary-500);
+  color: var(--primary-foreground);
+}
+
+.btn-primary:hover {
+  background-color: var(--p-primary-600);
+}
+
+.btn-primary:active {
+  background-color: var(--p-primary-700);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--surface-border);
+  color: var(--foreground);
+}
+
+.btn-outline:hover {
+  background-color: color-mix(in srgb, var(--p-primary-500), transparent 90%);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--foreground);
+}
+
+.btn-ghost:hover {
+  background-color: color-mix(in srgb, var(--p-primary-500), transparent 92%);
+}
+
+.btn-destructive {
+  background-color: var(--destructive);
+  color: white;
+}
+
+.btn-destructive:hover {
+  background-color: rgba(220, 38, 38, 0.9);
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-xs);
+  min-height: 2rem;
+}
+
+.btn-lg {
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: var(--font-size-base);
+  min-height: 2.75rem;
+}
+
+.btn-icon {
+  padding: var(--spacing-sm);
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+/* ========================================
+   Form Components
+   ======================================== */
+.form-input {
+  width: 100%;
+  background: color-mix(in srgb, var(--surface-section), #ffffff 6%);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius);
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--foreground);
+  font-size: var(--font-size-sm);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  border-color: var(--p-primary-500);
+  box-shadow: var(--focus-ring);
+}
+
+.form-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* ========================================
+   Badge Components
+   ======================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  border: 1px solid;
+  padding: 0.125rem var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Health Status Badges */
+.badge-healthy {
+  background: var(--p-primary-50);
+  color: var(--p-primary-700);
+  border: 1px solid var(--p-primary-200);
+}
+
+.badge-warning {
+  background: var(--accent-coral-50);
+  color: var(--accent-coral-700);
+  border: 1px solid var(--accent-coral-200);
+}
+
+.badge-critical {
+  background: rgb(254, 226, 226);
+  color: rgb(185, 28, 28);
+  border: 1px solid rgb(252, 165, 165);
+}
+
+/* ========================================
+   Typography
+   ======================================== */
+.text-xs {
+  font-size: var(--font-size-xs);
+}
+.text-sm {
+  font-size: var(--font-size-sm);
+}
+.text-base {
+  font-size: var(--font-size-base);
+}
+.text-lg {
+  font-size: var(--font-size-lg);
+}
+.text-xl {
+  font-size: var(--font-size-xl);
+}
+.text-2xl {
+  font-size: var(--font-size-2xl);
+}
+.text-3xl {
+  font-size: var(--font-size-3xl);
+}
+.text-4xl {
+  font-size: var(--font-size-4xl);
+}
+
+.font-normal {
+  font-weight: 400;
+}
+.font-medium {
+  font-weight: 500;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.font-bold {
+  font-weight: 700;
+}
+
+.text-primary {
+  color: var(--primary);
+}
+.text-muted {
+  color: var(--muted-foreground);
+}
+.text-destructive {
+  color: var(--destructive);
+}
+
+/* ========================================
+   Icon System
+   ======================================== */
+.icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.icon-sm {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.icon-lg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.icon-xl {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.icon-2xl {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+.hidden {
+  display: none;
+}
+.block {
+  display: block;
+}
+.flex {
+  display: flex;
+}
+.inline-flex {
+  display: inline-flex;
+}
+
+.w-full {
+  width: 100%;
+}
+.h-full {
+  height: 100%;
+}
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+.opacity-60 {
+  opacity: 0.6;
+}
+.opacity-75 {
+  opacity: 0.75;
+}
+
+.transition-all {
+  transition: all 0.2s ease;
+}
+.transition-colors {
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+.transition-opacity {
+  transition: opacity 0.2s ease;
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-lg);
+  }
+
+  .grid-cols-auto {
+    grid-template-columns: 1fr;
+  }
+
+  .flex-col-mobile {
+    flex-direction: column;
+  }
+
+  .text-center-mobile {
+    text-align: center;
+  }
+
+  .gap-sm-mobile {
+    gap: var(--spacing-sm);
+  }
+
+  .hidden-mobile {
+    display: none;
+  }
+  .block-mobile {
+    display: block;
+  }
+}
+
+@media (max-width: 640px) {
+  .text-2xl {
+    font-size: var(--font-size-xl);
+  }
+  .text-3xl {
+    font-size: var(--font-size-2xl);
+  }
+  .text-4xl {
+    font-size: var(--font-size-3xl);
+  }
+
+  .container {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+}
+
+/* ========================================
+   Animation Utilities
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ========================================
+   Focus & Accessibility
+   ======================================== */
+.focus-visible:focus-visible {
+  outline: 2px solid var(--p-primary-600);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

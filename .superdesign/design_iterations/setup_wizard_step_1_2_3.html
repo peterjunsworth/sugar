@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup - Step 3 - Sugar Tracker</title>
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="./default_ui_theme.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .wizard-container {
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--background);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .wizard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-lg) var(--spacing-xl);
+    }
+
+    .back-btn {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 50%;
+      color: var(--foreground);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .back-btn:hover {
+      transform: scale(1.05);
+      background: var(--surface-hover);
+    }
+
+    /* Progress Steps */
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      padding: 0 var(--spacing-xl) var(--spacing-xl);
+    }
+
+    .step-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: var(--surface-border);
+      transition: all 0.3s;
+    }
+
+    .step-dot.active {
+      width: 2rem;
+      background: var(--primary);
+      border-radius: 1rem;
+    }
+
+    .step-dot.completed {
+      background: var(--primary);
+    }
+
+    /* Content */
+    .wizard-content {
+      flex: 1;
+      padding: var(--spacing-2xl) var(--spacing-xl);
+      animation: fadeInUp 0.5s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .wizard-icon {
+      width: 5rem;
+      height: 5rem;
+      background: linear-gradient(135deg, var(--p-primary-500), var(--p-primary-400));
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--spacing-xl);
+      box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+    }
+
+    .wizard-title {
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      color: var(--foreground);
+      text-align: center;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .wizard-description {
+      font-size: var(--font-size-base);
+      color: var(--muted-foreground);
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    /* Permission Cards */
+    .permission-list {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .permission-item {
+      display: flex;
+      align-items: start;
+      gap: var(--spacing-md);
+    }
+
+    .permission-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: color-mix(in srgb, var(--primary), transparent 90%);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+
+    .permission-content h3 {
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: 4px;
+    }
+
+    .permission-content p {
+      font-size: var(--font-size-sm);
+      color: var(--muted-foreground);
+      line-height: 1.5;
+    }
+
+    /* Info Box */
+    .info-box {
+      width: 100%;
+      max-width: 400px;
+      background: color-mix(in srgb, var(--accent-purple-500), transparent 90%);
+      border: 1px solid color-mix(in srgb, var(--accent-purple-500), transparent 70%);
+      border-radius: var(--radius);
+      padding: var(--spacing-lg);
+      display: flex;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .info-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: var(--accent-purple-400);
+      flex-shrink: 0;
+    }
+
+    .info-text {
+      font-size: var(--font-size-sm);
+      color: var(--foreground);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .wizard-footer {
+      padding: var(--spacing-xl);
+      border-top: 1px solid var(--surface-border);
+    }
+
+    .footer-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: var(--spacing-lg);
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border: none;
+      border-radius: var(--radius);
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+    }
+
+    .btn-primary:hover {
+      background: var(--p-primary-600);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(20, 184, 166, 0.3);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: transparent;
+      border: none;
+      color: var(--muted-foreground);
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+      color: var(--primary);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wizard-container">
+    <!-- Header -->
+    <div class="wizard-header">
+      <a href="setup_wizard_step_1_2.html" class="back-btn">
+        <i data-lucide="arrow-left" class="icon"></i>
+      </a>
+      <div></div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-steps">
+      <div class="step-dot completed"></div>
+      <div class="step-dot completed"></div>
+      <div class="step-dot active"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="wizard-content">
+      <div class="wizard-icon">
+        <i data-lucide="shield-check" style="width: 2.5rem; height: 2.5rem; color: white;"></i>
+      </div>
+
+      <h1 class="wizard-title">Connect Your Device</h1>
+      <p class="wizard-description">
+        We need your permission to access your glucose data from your device.
+      </p>
+
+      <div class="permission-list">
+        <div class="permission-item">
+          <div class="permission-icon">
+            <i data-lucide="activity" class="icon"></i>
+          </div>
+          <div class="permission-content">
+            <h3>Glucose Data Access</h3>
+            <p>Read your continuous glucose monitoring data to track levels and trends.</p>
+          </div>
+        </div>
+
+        <div class="permission-item">
+          <div class="permission-icon">
+            <i data-lucide="bell" class="icon"></i>
+          </div>
+          <div class="permission-content">
+            <h3>Notifications</h3>
+            <p>Send alerts for high/low glucose levels and medication reminders.</p>
+          </div>
+        </div>
+
+        <div class="permission-item">
+          <div class="permission-icon">
+            <i data-lucide="database" class="icon"></i>
+          </div>
+          <div class="permission-content">
+            <h3>Health Data Storage</h3>
+            <p>Securely store your health information for AI-powered insights.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <i data-lucide="lock" class="info-icon"></i>
+        <div class="info-text">
+          Your data is encrypted and secure. We never sell your health information to third parties.
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="wizard-footer">
+      <div class="footer-buttons">
+        <button type="button" class="btn-primary" id="allowBtn">
+          <i data-lucide="check" class="icon-lg"></i>
+          <span>Allow Access</span>
+        </button>
+        <a href="welcome_1.html" class="btn-secondary">I'll do this later</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Allow button with loading state
+    const allowBtn = document.getElementById('allowBtn');
+
+    allowBtn.addEventListener('click', function() {
+      // Change button to loading state
+      allowBtn.innerHTML = `
+        <div style="width: 1.5rem; height: 1.5rem; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+        <span>Connecting...</span>
+      `;
+      allowBtn.disabled = true;
+
+      // Add spin animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Simulate connection delay
+      setTimeout(function() {
+        window.location.href = 'welcome_1.html';
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

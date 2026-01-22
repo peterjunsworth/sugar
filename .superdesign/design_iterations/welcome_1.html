@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome - Sugar Tracker</title>
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="./default_ui_theme.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .welcome-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: var(--background);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Responsive Content Container */
+    .content-wrapper {
+      max-width: 100%;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Mobile: Full width */
+    @media (max-width: 767px) {
+      .content-wrapper {
+        max-width: 100%;
+      }
+    }
+
+    /* Tablet: 600px max */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .content-wrapper {
+        max-width: 600px;
+      }
+    }
+
+    /* Desktop: 900px max */
+    @media (min-width: 1024px) {
+      .content-wrapper {
+        max-width: 900px;
+      }
+    }
+
+    /* Animated Background Gradient */
+    .gradient-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        135deg,
+        var(--p-primary-950) 0%,
+        var(--p-primary-800) 50%,
+        var(--p-primary-600) 100%
+      );
+      opacity: 0.95;
+      z-index: 0;
+    }
+
+    .gradient-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.5;
+      animation: blobFloat 8s ease-in-out infinite;
+    }
+
+    .blob-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent-purple-500);
+      top: -100px;
+      right: -100px;
+      animation-delay: 0s;
+    }
+
+    .blob-2 {
+      width: 250px;
+      height: 250px;
+      background: var(--accent-coral-500);
+      bottom: -80px;
+      left: -80px;
+      animation-delay: 2s;
+    }
+
+    .blob-3 {
+      width: 200px;
+      height: 200px;
+      background: var(--p-primary-400);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: 4s;
+    }
+
+    /* Content Container */
+    .welcome-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: var(--spacing-2xl) 0;
+      justify-content: space-between;
+    }
+
+    .welcome-content .content-wrapper {
+      padding: 0 var(--spacing-xl);
+    }
+
+    @media (max-width: 767px) {
+      .welcome-content .content-wrapper {
+        padding: 0 var(--spacing-xl);
+      }
+    }
+
+    /* Logo and Header */
+    .welcome-header {
+      text-align: center;
+      margin-top: var(--spacing-3xl);
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .app-logo {
+      width: 5rem;
+      height: 5rem;
+      background: linear-gradient(135deg, var(--p-primary-400), var(--p-primary-300));
+      border-radius: calc(var(--radius) + 8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--spacing-lg);
+      box-shadow: 0 8px 24px rgba(20, 184, 166, 0.4);
+      animation: logoPulse 3s ease-in-out infinite;
+    }
+
+    .app-title {
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      color: white;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .app-subtitle {
+      font-size: var(--font-size-base);
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 400;
+    }
+
+    /* Features Section */
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+      margin: var(--spacing-2xl) 0;
+      animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: start;
+      gap: var(--spacing-lg);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius);
+      padding: var(--spacing-lg);
+      transition: all 0.3s;
+    }
+
+    .feature-item:hover {
+      transform: translateX(8px);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .feature-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: calc(var(--radius) - 2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .feature-icon.chat {
+      background: linear-gradient(135deg, var(--accent-purple-400), var(--accent-purple-500));
+    }
+
+    .feature-icon.track {
+      background: linear-gradient(135deg, var(--p-primary-400), var(--p-primary-500));
+    }
+
+    .feature-icon.insights {
+      background: linear-gradient(135deg, var(--accent-coral-400), var(--accent-coral-500));
+    }
+
+    .feature-content {
+      flex: 1;
+    }
+
+    .feature-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: white;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .feature-description {
+      font-size: var(--font-size-sm);
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.5;
+    }
+
+    /* Bottom Section */
+    .welcome-footer {
+      animation: fadeInUp 0.8s ease-out 0.4s backwards;
+    }
+
+    .cta-button {
+      width: 100%;
+      background: white;
+      color: var(--p-primary-700);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      border-radius: var(--radius);
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .cta-button:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .cta-button:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    .secondary-link {
+      text-align: center;
+      margin-top: var(--spacing-lg);
+      font-size: var(--font-size-sm);
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .secondary-link a {
+      color: white;
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.2s;
+    }
+
+    .secondary-link a:hover {
+      border-bottom-color: white;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes blobFloat {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+      }
+      25% {
+        transform: translate(30px, -30px) scale(1.1);
+      }
+      50% {
+        transform: translate(-20px, 20px) scale(0.9);
+      }
+      75% {
+        transform: translate(20px, 30px) scale(1.05);
+      }
+    }
+
+    @keyframes logoPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 8px 24px rgba(20, 184, 166, 0.4);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 12px 32px rgba(20, 184, 166, 0.6);
+      }
+    }
+
+    /* Version Badge */
+    .version-badge {
+      position: absolute;
+      top: var(--spacing-lg);
+      right: var(--spacing-lg);
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: calc(var(--radius) - 2px);
+      font-size: var(--font-size-xs);
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="welcome-container">
+    <!-- Animated Background -->
+    <div class="gradient-bg">
+      <div class="gradient-blob blob-1"></div>
+      <div class="gradient-blob blob-2"></div>
+      <div class="gradient-blob blob-3"></div>
+    </div>
+
+    <!-- Version Badge -->
+    <div class="version-badge">v1.0 Beta</div>
+
+    <!-- Content -->
+    <div class="welcome-content">
+      <div class="content-wrapper">
+      <!-- Header -->
+      <div class="welcome-header">
+        <div class="app-logo">
+          <i data-lucide="droplet" style="width: 2.5rem; height: 2.5rem; color: white;"></i>
+        </div>
+        <h1 class="app-title">Sugar Tracker</h1>
+        <p class="app-subtitle">Your intelligent glucose companion</p>
+      </div>
+
+      <!-- Features -->
+      <div class="features">
+        <div class="feature-item">
+          <div class="feature-icon chat">
+            <i data-lucide="message-circle" class="icon-xl" style="color: white;"></i>
+          </div>
+          <div class="feature-content">
+            <h3 class="feature-title">Chat with AI</h3>
+            <p class="feature-description">
+              Ask questions, log meals with photos or text, and get personalized advice instantly.
+            </p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon track">
+            <i data-lucide="activity" class="icon-xl" style="color: white;"></i>
+          </div>
+          <div class="feature-content">
+            <h3 class="feature-title">Track Everything</h3>
+            <p class="feature-description">
+              Monitor glucose levels, food impact, exercise effects, and medication timing all in one place.
+            </p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon insights">
+            <i data-lucide="sparkles" class="icon-xl" style="color: white;"></i>
+          </div>
+          <div class="feature-content">
+            <h3 class="feature-title">Smart Insights</h3>
+            <p class="feature-description">
+              Get AI-powered predictions and recommendations based on your unique patterns and history.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="welcome-footer">
+        <button class="cta-button" onclick="window.location.href='chat_interface_1.html'">
+          <span>Get Started, John</span>
+          <i data-lucide="arrow-right" class="icon-lg"></i>
+        </button>
+      </div>
+      </div>
+      <!-- End content-wrapper -->
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Add smooth transition on button click
+    document.querySelector('.cta-button').addEventListener('click', function(e) {
+      e.preventDefault();
+      this.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        window.location.href = 'chat_interface_1.html';
+      }, 200);
+    });
+  </script>
+</body>
+</html>

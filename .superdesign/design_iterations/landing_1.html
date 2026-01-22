@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sugar Tracker - Your Intelligent Glucose Companion</title>
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="./default_ui_theme.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .landing-container {
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--background);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Gradient Background */
+    .gradient-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60vh;
+      background: linear-gradient(135deg, var(--p-primary-600), var(--p-primary-400));
+      z-index: 0;
+    }
+
+    .gradient-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+    }
+
+    .blob-1 {
+      width: 400px;
+      height: 400px;
+      background: var(--accent-purple-500);
+      top: -200px;
+      right: -150px;
+      animation: blobFloat 10s ease-in-out infinite;
+    }
+
+    .blob-2 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent-coral-500);
+      top: 100px;
+      left: -100px;
+      animation: blobFloat 12s ease-in-out infinite reverse;
+    }
+
+    /* Header */
+    .landing-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-lg) var(--spacing-xl);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .logo-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: white;
+      border-radius: calc(var(--radius) - 2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--p-primary-600);
+    }
+
+    .logo-text {
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      color: white;
+    }
+
+    .login-link {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: var(--font-size-sm);
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s;
+    }
+
+    .login-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      position: relative;
+      z-index: 1;
+      padding: var(--spacing-3xl) var(--spacing-xl);
+      text-align: center;
+      color: white;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .hero-title {
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .hero-subtitle {
+      font-size: var(--font-size-lg);
+      opacity: 0.95;
+      margin-bottom: var(--spacing-2xl);
+      line-height: 1.6;
+    }
+
+    .cta-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    }
+
+    .cta-primary {
+      background: white;
+      color: var(--p-primary-700);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      border-radius: var(--radius);
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .cta-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .cta-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      padding: var(--spacing-lg) var(--spacing-xl);
+      border-radius: var(--radius);
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .cta-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Features Section */
+    .features-section {
+      position: relative;
+      z-index: 1;
+      background: var(--background);
+      border-radius: calc(var(--radius) + 12px) calc(var(--radius) + 12px) 0 0;
+      margin-top: -2rem;
+      padding: var(--spacing-2xl) var(--spacing-xl);
+      animation: fadeInUp 0.8s ease-out 0.4s backwards;
+    }
+
+    .section-title {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--foreground);
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .features-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+    .feature-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-xl);
+      display: flex;
+      gap: var(--spacing-lg);
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon-wrapper {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .feature-icon-wrapper.ai {
+      background: linear-gradient(135deg, var(--accent-purple-400), var(--accent-purple-500));
+    }
+
+    .feature-icon-wrapper.track {
+      background: linear-gradient(135deg, var(--p-primary-400), var(--p-primary-500));
+    }
+
+    .feature-icon-wrapper.insights {
+      background: linear-gradient(135deg, var(--accent-coral-400), var(--accent-coral-500));
+    }
+
+    .feature-content h3 {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .feature-content p {
+      font-size: var(--font-size-sm);
+      color: var(--muted-foreground);
+      line-height: 1.6;
+    }
+
+    /* Footer CTA */
+    .footer-cta {
+      padding: var(--spacing-2xl) var(--spacing-xl);
+      text-align: center;
+    }
+
+    .footer-cta-text {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes blobFloat {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+      }
+      33% {
+        transform: translate(30px, -30px) scale(1.1);
+      }
+      66% {
+        transform: translate(-20px, 20px) scale(0.9);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="landing-container">
+    <!-- Gradient Background -->
+    <div class="gradient-bg">
+      <div class="gradient-blob blob-1"></div>
+      <div class="gradient-blob blob-2"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="landing-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <i data-lucide="droplet" class="icon-lg"></i>
+        </div>
+        <span class="logo-text">Sugar Tracker</span>
+      </div>
+      <a href="login_1.html" class="login-link">Log In</a>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1 class="hero-title">Take Control of Your Glucose Levels</h1>
+      <p class="hero-subtitle">
+        AI-powered tracking, personalized insights, and smart recommendations—all in one simple app.
+      </p>
+      <div class="cta-buttons">
+        <a href="signup_1.html" class="cta-primary">
+          <span>Get Started Free</span>
+          <i data-lucide="arrow-right" class="icon-lg"></i>
+        </a>
+        <a href="login_1.html" class="cta-secondary">
+          <span>Already have an account?</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+      <h2 class="section-title">Everything You Need</h2>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper ai">
+            <i data-lucide="message-circle" class="icon-2xl" style="color: white;"></i>
+          </div>
+          <div class="feature-content">
+            <h3>Chat with AI</h3>
+            <p>Log meals with photos or text, ask questions, and get instant personalized advice from your AI health companion.</p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper track">
+            <i data-lucide="activity" class="icon-2xl" style="color: white;"></i>
+          </div>
+          <div class="feature-content">
+            <h3>Comprehensive Tracking</h3>
+            <p>Monitor glucose levels, food impact, exercise effects, and medication timing all in one beautiful interface.</p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper insights">
+            <i data-lucide="sparkles" class="icon-2xl" style="color: white;"></i>
+          </div>
+          <div class="feature-content">
+            <h3>Smart Predictions</h3>
+            <p>Get AI-powered glucose predictions and personalized recommendations based on your unique patterns and history.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <section class="footer-cta">
+      <p class="footer-cta-text">Ready to start your journey?</p>
+      <a href="signup_1.html" class="cta-primary">
+        <span>Create Your Account</span>
+        <i data-lucide="arrow-right" class="icon-lg"></i>
+      </a>
+    </section>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
