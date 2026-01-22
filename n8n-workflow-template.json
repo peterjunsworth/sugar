@@ -1,0 +1,98 @@
+{
+  "name": "Sugar Diabetes Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "diabetes-chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "model": "claude-3-5-sonnet-20240620",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a diabetes management assistant helping users track their health data.\n\nUser ID: {{ $json.body.userId }}\nUser Message: {{ $json.body.message }}\n\nRecent Context:\n- Recent Glucose Readings: {{ JSON.stringify($json.body.context?.recentGlucose?.slice(0,5) || []) }}\n- Recent Meals: {{ JSON.stringify($json.body.context?.recentMeals?.slice(0,5) || []) }}\n- Recent Insulin: {{ JSON.stringify($json.body.context?.recentInsulin?.slice(0,5) || []) }}\n\nYour tasks:\n1. Respond conversationally and helpfully to the user's message\n2. If the user mentions food, insulin, exercise, stress, or sleep, ask follow-up questions to get complete information\n3. When you have complete information about an event, extract it as structured data\n4. Provide insights based on their historical data when relevant\n5. Be supportive and educational, but remind them this is not medical advice\n\nIf you can extract structured data from the message, include it in your response as JSON with keys:\n- type: (meal|insulin|glucose|exercise|stress|sleep)\n- data: {timestamp, ...relevant fields}\n\nExample extraction for \"I ate 2 slices of pizza at 7pm\":\n{\"type\":\"meal\",\"data\":{\"timestamp\":\"2024-01-15T19:00:00Z\",\"name\":\"Pizza\",\"description\":\"2 slices\",\"totalCarbs\":60}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "AI Model (Claude/GPT)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_API_CREDENTIAL_ID",
+          "name": "Anthropic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse AI response and extract structured data if present\nconst aiResponse = $input.all()[0].json.output;\n\n// Try to find JSON in the response\nlet extractedData = null;\nlet cleanResponse = aiResponse;\n\ntry {\n  // Look for JSON patterns in the response\n  const jsonMatch = aiResponse.match(/\\{[\\s\\S]*?\"type\"[\\s\\S]*?\\}/);\n  if (jsonMatch) {\n    extractedData = JSON.parse(jsonMatch[0]);\n    // Remove the JSON from the response\n    cleanResponse = aiResponse.replace(jsonMatch[0], '').trim();\n  }\n} catch (e) {\n  // No structured data found, that's okay\n}\n\n// Generate helpful suggestions\nconst suggestions = [\n  \"Log a meal\",\n  \"Record insulin dose\",\n  \"Check glucose patterns\"\n];\n\nreturn [{\n  json: {\n    response: cleanResponse || aiResponse,\n    extractedData: extractedData,\n    suggestions: suggestions\n  }\n}];"
+      },
+      "name": "Process Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Model (Claude/GPT)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Model (Claude/GPT)": {
+      "main": [
+        [
+          {
+            "node": "Process Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
