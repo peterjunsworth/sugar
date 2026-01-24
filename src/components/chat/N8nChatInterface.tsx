@@ -20,7 +20,7 @@ export default function N8nChatInterface({ className = '' }: N8nChatInterfacePro
       import('@n8n/chat').then((module) => {
         const createChat = module.createChat || module.default?.createChat || module.default;
 
-        if (createChat && typeof createChat === 'function') {
+            if (createChat && typeof createChat === 'function') {
           try {
             createChat({
               // Your n8n webhook URL
@@ -51,7 +51,10 @@ export default function N8nChatInterface({ className = '' }: N8nChatInterfacePro
 
               // Show welcome screen on first load
               showWelcomeScreen: false,
-            });
+
+              // Auto-open the chat (since it's embedded)
+              defaultOpen: true,
+            } as any);
 
             console.log('n8n chat initialized successfully in fullscreen mode');
           } catch (error) {
