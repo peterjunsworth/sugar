@@ -8,6 +8,7 @@ export interface User {
   name: string;
   createdAt: Date;
   updatedAt: Date;
+  onboardingCompleted?: boolean;
   cgmProvider?: 'dexcom' | 'libre' | 'eversense';
   cgmAccessToken?: string;
   cgmRefreshToken?: string;

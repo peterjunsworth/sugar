@@ -31,7 +31,7 @@ export default function N8nChatInterface({ className = '' }: N8nChatInterfacePro
               mode: 'fullscreen',
 
               // Target element to render the chat
-              target: chatContainerRef.current,
+              target: chatContainerRef.current as Element,
 
               // Pass user information to the chat (will be sent with each message)
               initialMessages: [
@@ -51,9 +51,6 @@ export default function N8nChatInterface({ className = '' }: N8nChatInterfacePro
 
               // Show welcome screen on first load
               showWelcomeScreen: false,
-
-              // Auto-open the chat (since it's embedded)
-              defaultOpen: true,
             });
 
             console.log('n8n chat initialized successfully in fullscreen mode');

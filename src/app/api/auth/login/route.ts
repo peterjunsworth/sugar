@@ -39,15 +39,28 @@ export async function POST(request: NextRequest) {
     // Generate token
     const token = generateToken(user._id.toString(), user.email);
 
-    return NextResponse.json({
+    // Create response with token
+    const response = NextResponse.json({
       token,
       user: {
         id: user._id.toString(),
         email: user.email,
         name: user.name,
+        onboardingCompleted: user.onboardingCompleted || false,
         cgmProvider: user.cgmProvider,
       },
     });
+
+    // Set token as HTTP-only cookie
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

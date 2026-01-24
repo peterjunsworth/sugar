@@ -8,6 +8,8 @@ interface User {
   email: string;
   name: string;
   cgmProvider?: 'dexcom' | 'libre' | 'eversense';
+  createdAt?: string;
+  lastLoginAt?: string;
 }
 
 interface AuthContextType {
