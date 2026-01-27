@@ -1,4 +1,4 @@
-# Sugar - Diabetes Tracking Assistant
+# Sugar - Diabetes Tracking Assistant - For build
 
 A Next.js application that helps diabetics track their carb ratio and understand how different food groups affect their blood sugar levels through conversational AI and CGM integration.
 
