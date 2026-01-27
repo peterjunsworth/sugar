@@ -15,8 +15,14 @@ const isDev = process.env.NODE_ENV === 'development';
 // Allowed origins for production
 const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_APP_URL,
-  'https://sugar-app.vercel.app', // Update with actual production domain
+  'https://sugar-zeta.vercel.app',
+  // Add preview deployment pattern
 ].filter(Boolean);
+
+// Also allow Vercel preview deployments (*.vercel.app)
+function isVercelPreview(origin: string): boolean {
+  return /^https:\/\/sugar-[a-z0-9-]+\.vercel\.app$/.test(origin);
+}
 
 /**
  * Validates request origin for CSRF protection.
@@ -36,7 +42,7 @@ export function validateOrigin(request: NextRequest): { valid: boolean; error?: 
     if (referer) {
       try {
         const refererUrl = new URL(referer);
-        if (ALLOWED_ORIGINS.includes(refererUrl.origin)) {
+        if (ALLOWED_ORIGINS.includes(refererUrl.origin) || isVercelPreview(refererUrl.origin)) {
           return { valid: true };
         }
       } catch {
@@ -49,7 +55,7 @@ export function validateOrigin(request: NextRequest): { valid: boolean; error?: 
   }
 
   // Validate Origin header
-  if (ALLOWED_ORIGINS.includes(origin)) {
+  if (ALLOWED_ORIGINS.includes(origin) || isVercelPreview(origin)) {
     return { valid: true };
   }
 
