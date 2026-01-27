@@ -9,14 +9,25 @@ test.describe('Login Page', () => {
     await expect(page.getByLabel(/email/i)).toBeVisible();
     await expect(page.locator('#password')).toBeVisible();
     await expect(page.getByLabel(/remember me/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /log in/i })).toBeVisible();
   });
 
   test('should show validation errors for empty form', async ({ page }) => {
-    await page.getByRole('button', { name: /sign in/i }).click();
+    // The form uses native HTML required validation on email and password inputs
+    // When clicking submit with empty fields, native validation shows browser tooltip
+    // and focuses on the first invalid field (email)
 
-    await expect(page.getByText(/email is required/i)).toBeVisible();
-    await expect(page.getByText(/password is required/i)).toBeVisible();
+    const emailInput = page.getByLabel(/email/i);
+    const submitButton = page.getByRole('button', { name: /log in/i });
+
+    // Click submit with empty fields - native validation should prevent submission
+    await submitButton.click();
+
+    // Email input should receive focus due to native validation
+    await expect(emailInput).toBeFocused();
+
+    // Verify we're still on login page (form wasn't submitted)
+    await expect(page).toHaveURL('/login');
   });
 
   test.skip('should validate email format', async ({ page }) => {
@@ -36,7 +47,7 @@ test.describe('Login Page', () => {
   test('should show error for wrong credentials', async ({ page }) => {
     await page.getByLabel(/email/i).fill('wrong@example.com');
     await page.locator('#password').fill('wrongpassword');
-    await page.getByRole('button', { name: /sign in/i }).click();
+    await page.getByRole('button', { name: /log in/i }).click();
 
     await expect(page.getByText(/invalid email or password/i)).toBeVisible({ timeout: 5000 });
   });
@@ -49,9 +60,8 @@ test.describe('Login Page', () => {
     await page.getByLabel(/full name/i).fill('New User');
     await page.getByLabel(/email/i).fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill('password123');
-    await page.getByLabel(/confirm password/i).fill('password123');
     await page.getByLabel(/terms/i).check();
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByRole('button', { name: /create account/i }).click();
 
     // Wait for either setup or login (middleware might redirect)
     await page.waitForLoadState('networkidle');
@@ -69,7 +79,7 @@ test.describe('Login Page', () => {
 
     await page.getByLabel(/email/i).fill(testEmail);
     await page.locator('#password').fill('password123');
-    await page.getByRole('button', { name: /sign in/i }).click();
+    await page.getByRole('button', { name: /log in/i }).click();
 
     // Wait for navigation
     await page.waitForLoadState('networkidle');
@@ -154,7 +164,7 @@ test.describe('Login Page', () => {
 
   test('should display social login buttons', async ({ page }) => {
     await expect(page.getByRole('button', { name: /google/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /apple/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /github/i })).toBeVisible();
   });
 
   test('should show forgot password link', async ({ page }) => {
@@ -187,7 +197,7 @@ test.describe('Login Page', () => {
   test('should be responsive on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await expect(page.getByLabel(/email/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /log in/i })).toBeVisible();
   });
 
   test('should have no console errors', async ({ page }) => {

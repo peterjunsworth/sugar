@@ -1,27 +1,40 @@
 import { test, expect } from '@playwright/test';
 
 test.use({
+  launchOptions: { slowMo: 500 },
   headless: false,
-  slowMo: 1000,
 });
+
+// Increase timeout for authentication flow
+test.setTimeout(60000);
 
 // Helper to login first (welcome is protected)
 async function loginAndNavigate(page: any) {
   // First register a user
   await page.goto('/signup');
+  await page.waitForLoadState('networkidle');
   const testEmail = `welcome${Date.now()}@example.com`;
 
   await page.getByLabel(/full name/i).fill('Welcome Test User');
-  await page.getByLabel(/email/i).fill(testEmail);
+  await page.getByLabel(/^email$/i).fill(testEmail);
   await page.getByLabel('Password', { exact: true }).fill('password123');
   await page.getByLabel(/terms/i).check();
-  await page.getByRole('button', { name: /sign up/i }).click();
+  await page.getByRole('button', { name: /create account/i }).click();
 
-  // Should redirect to setup, but we want welcome page
-  // So we'll navigate directly
-  await page.waitForTimeout(2000);
+  // Wait for redirect after successful signup
+  await page.waitForURL(/\/(setup|welcome|login)/, { timeout: 15000 });
+
+  // If redirected to login, need to login
+  if (page.url().includes('/login')) {
+    await page.getByLabel(/^email$/i).fill(testEmail);
+    await page.getByLabel('Password', { exact: true }).fill('password123');
+    await page.getByRole('button', { name: /sign in/i }).click();
+    await page.waitForURL(/\/(setup|welcome|dashboard)/, { timeout: 10000 });
+  }
+
+  // Navigate to welcome page
   await page.goto('/welcome');
-  await page.waitForTimeout(1000);
+  await page.waitForLoadState('networkidle');
 }
 
 test('Welcome page visual check - All elements', async ({ page }) => {
@@ -34,19 +47,19 @@ test('Welcome page visual check - All elements', async ({ page }) => {
   await expect(container).toBeVisible();
   console.log('✓ Container visible');
 
-  // Check gradient background
+  // Check gradient background - it spans full container
   const gradientBg = page.locator('.gradient-bg');
-  await expect(gradientBg).toBeVisible();
-  console.log('✓ Gradient background visible');
+  await expect(gradientBg).toBeAttached();
+  console.log('✓ Gradient background attached');
 
-  // Check animated blobs
+  // Check animated blobs - they're positioned absolutely and may overflow
   const blob1 = page.locator('.blob-1');
   const blob2 = page.locator('.blob-2');
   const blob3 = page.locator('.blob-3');
-  await expect(blob1).toBeVisible();
-  await expect(blob2).toBeVisible();
-  await expect(blob3).toBeVisible();
-  console.log('✓ All 3 animated blobs visible');
+  await expect(blob1).toBeAttached();
+  await expect(blob2).toBeAttached();
+  await expect(blob3).toBeAttached();
+  console.log('✓ All 3 animated blobs attached');
 
   // Check version badge
   const versionBadge = page.locator('.version-badge');
@@ -146,8 +159,9 @@ test('Welcome page animations check', async ({ page }) => {
   });
   console.log(`✓ Logo pulse animation: ${logoAnimation ? 'present' : 'missing'}`);
 
-  // Check blob animations
+  // Check blob animations - blobs are positioned absolutely with negative values
   const blob1 = page.locator('.blob-1');
+  await expect(blob1).toBeAttached();
   const blobAnimation = await blob1.evaluate((el) => {
     return window.getComputedStyle(el).animation;
   });

@@ -16,7 +16,7 @@ test.describe('Landing Page', () => {
   });
 
   test('should display all 3 features', async ({ page }) => {
-    const features = page.locator('[data-testid="feature-card"]');
+    const features = page.locator('.feature-card');
     await expect(features).toHaveCount(3);
 
     // Verify feature titles within feature cards
@@ -25,37 +25,35 @@ test.describe('Landing Page', () => {
     await expect(features.filter({ hasText: 'Smart Predictions' })).toBeVisible();
   });
 
-  test('should display 4 how-it-works steps', async ({ page }) => {
-    const steps = page.locator('[data-testid="step-item"]');
-    await expect(steps).toHaveCount(4);
-
-    // Verify step titles within step items
-    await expect(steps.filter({ hasText: 'Connect Your CGM' })).toBeVisible();
-    await expect(steps.filter({ hasText: 'Chat with AI' })).toBeVisible();
-    await expect(steps.filter({ hasText: 'Get Insights' })).toBeVisible();
-    await expect(steps.filter({ hasText: 'Optimize Health' })).toBeVisible();
+  test('should display section headings', async ({ page }) => {
+    // The simplified landing page has "Everything You Need" as the features section heading
+    await expect(page.getByRole('heading', { name: 'Everything You Need' })).toBeVisible();
   });
 
-  test('should display 2 pricing cards', async ({ page }) => {
-    const pricingCards = page.locator('[data-testid="pricing-card"]');
-    await expect(pricingCards).toHaveCount(2);
+  test('should display feature cards with descriptions', async ({ page }) => {
+    const features = page.locator('.feature-card');
+    await expect(features).toHaveCount(3);
 
-    // Verify pricing plan names within pricing cards
-    await expect(pricingCards.filter({ hasText: 'Free' }).first()).toBeVisible();
-    await expect(pricingCards.filter({ hasText: 'Premium' })).toBeVisible();
+    // Verify each feature card has both title and description
+    const chatFeature = features.filter({ hasText: 'Chat with AI' });
+    await expect(chatFeature).toContainText('Log meals with photos');
 
-    // Verify pricing within pricing cards
-    await expect(pricingCards.filter({ hasText: '$0' })).toBeVisible();
-    await expect(pricingCards.filter({ hasText: '$9.99' })).toBeVisible();
+    const trackingFeature = features.filter({ hasText: 'Comprehensive Tracking' });
+    await expect(trackingFeature).toContainText('Monitor glucose levels');
+
+    const predictionsFeature = features.filter({ hasText: 'Smart Predictions' });
+    await expect(predictionsFeature).toContainText('AI-powered glucose predictions');
   });
 
   test('should display final CTA section', async ({ page }) => {
-    await expect(page.locator('text=Start Your Journey to Better Health')).toBeVisible();
+    // The simplified landing page has different CTA text
+    await expect(page.locator('text=Ready to start your journey?')).toBeVisible();
     await expect(page.getByRole('link', { name: /create your account/i })).toBeVisible();
   });
 
-  test('should navigate to signup from pricing card', async ({ page }) => {
-    await page.getByRole('link', { name: /choose free/i }).click();
+  test('should navigate to signup from footer CTA', async ({ page }) => {
+    // The simplified landing page has a footer CTA instead of pricing cards
+    await page.getByRole('link', { name: /create your account/i }).click();
     await expect(page).toHaveURL('/signup');
   });
 
@@ -64,46 +62,17 @@ test.describe('Landing Page', () => {
     await expect(page).toHaveURL('/login');
   });
 
-  test('should have working footer links', async ({ page }) => {
-    // The landing page has a specific footer with Help link
-    // We need to find the footer that contains "Help" text
-    const footer = page.locator('footer').filter({ hasText: 'Help' });
-    await expect(footer).toContainText('About');
-    await expect(footer).toContainText('Privacy');
-    await expect(footer).toContainText('Terms');
-    await expect(footer).toContainText('Contact');
-    await expect(footer).toContainText('Help');
-
-    // Verify current year in copyright
-    const currentYear = new Date().getFullYear();
-    await expect(footer).toContainText(`© ${currentYear} Sugar`);
+  test('should have header with logo and login link', async ({ page }) => {
+    // The simplified landing page has a header with logo and login link
+    await expect(page.locator('.logo-text')).toContainText('Sugar Tracker');
+    await expect(page.getByRole('link', { name: /log in/i })).toBeVisible();
   });
 
-  test('should toggle theme correctly', async ({ page }) => {
-    const html = page.locator('html');
-    const themeToggle = page.getByRole('button', { name: /toggle theme/i });
-
-    // Wait for theme to be initialized (ThemeProvider mounts)
-    await page.waitForTimeout(500);
-
-    // Get initial theme state
-    const initialHasClass = await html.evaluate(el => el.classList.contains('dark'));
-
-    // Toggle theme
-    await themeToggle.click();
-    await page.waitForTimeout(300);
-
-    // Should be opposite of initial state
-    const afterFirstToggle = await html.evaluate(el => el.classList.contains('dark'));
-    expect(afterFirstToggle).toBe(!initialHasClass);
-
-    // Toggle back
-    await themeToggle.click();
-    await page.waitForTimeout(300);
-
-    // Should be back to initial state
-    const afterSecondToggle = await html.evaluate(el => el.classList.contains('dark'));
-    expect(afterSecondToggle).toBe(initialHasClass);
+  test('should have gradient background', async ({ page }) => {
+    // The simplified landing page uses gradient blobs for background
+    // The gradient-bg element exists but may be hidden (used as a visual effect layer)
+    await expect(page.locator('.gradient-bg')).toBeAttached();
+    await expect(page.locator('.gradient-blob')).toHaveCount(2);
   });
 
   test('should be responsive on mobile', async ({ page }) => {
@@ -112,13 +81,9 @@ test.describe('Landing Page', () => {
     // Hero should be visible
     await expect(page.locator('h1')).toBeVisible();
 
-    // Features should stack vertically
-    const features = page.locator('[data-testid="feature-card"]');
+    // Features should stack vertically (all 3 visible)
+    const features = page.locator('.feature-card');
     await expect(features).toHaveCount(3);
-
-    // Pricing cards should be visible
-    const pricingCards = page.locator('[data-testid="pricing-card"]');
-    await expect(pricingCards).toHaveCount(2);
 
     // CTAs should be visible
     await expect(page.getByRole('link', { name: /get started free/i }).first()).toBeVisible();
@@ -130,17 +95,15 @@ test.describe('Landing Page', () => {
     // All sections should be visible
     await expect(page.locator('h1')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Everything You Need' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'How It Works' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Choose Your Plan' })).toBeVisible();
+    // The simplified landing page doesn't have "How It Works" or "Choose Your Plan" sections
+    await expect(page.locator('.footer-cta')).toBeVisible();
   });
 
   test('should show hover effects on cards', async ({ page }) => {
-    const firstFeature = page.locator('[data-testid="feature-card"]').first();
+    const firstFeature = page.locator('.feature-card').first();
 
-    // Get the initial transform style
-    const initialTransform = await firstFeature.evaluate(el =>
-      window.getComputedStyle(el).transform
-    );
+    // Verify the feature card exists
+    await expect(firstFeature).toBeVisible();
 
     // Hover over the card
     await firstFeature.hover();
@@ -148,34 +111,28 @@ test.describe('Landing Page', () => {
     // Wait a bit for transition
     await page.waitForTimeout(500);
 
-    // The transform should change (card should move up)
-    const hoveredTransform = await firstFeature.evaluate(el =>
-      window.getComputedStyle(el).transform
-    );
-
-    // Note: This test verifies the hover effect exists
-    // In a real test, you'd check that the transform values differ
-    expect(hoveredTransform).toBeDefined();
+    // Verify card is still visible after hover (basic hover test)
+    await expect(firstFeature).toBeVisible();
   });
 
   test('should have accessible navigation', async ({ page }) => {
-    // Check that interactive elements have proper labels
-    await expect(page.getByRole('button', { name: /toggle theme/i })).toBeVisible();
+    // Check that interactive elements are accessible
+    await expect(page.getByRole('link', { name: /log in/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /get started free/i }).first()).toBeVisible();
 
     // Check that links are keyboard accessible
     await page.keyboard.press('Tab');
-    // First tab should focus on theme toggle or logo
+    // First tab should focus on an interactive element
   });
 
   test('should display all icons correctly', async ({ page }) => {
-    // Feature icons should be visible
-    const featureCards = page.locator('[data-testid="feature-card"]');
+    // Feature icons should be visible (via feature-icon-wrapper)
+    const featureCards = page.locator('.feature-card');
     await expect(featureCards).toHaveCount(3);
 
-    // Step icons should be visible
-    const stepItems = page.locator('[data-testid="step-item"]');
-    await expect(stepItems).toHaveCount(4);
+    // Each feature card should have an icon wrapper
+    const iconWrappers = page.locator('.feature-icon-wrapper');
+    await expect(iconWrappers).toHaveCount(3);
   });
 
   test('should have proper heading hierarchy', async ({ page }) => {

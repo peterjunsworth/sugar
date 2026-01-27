@@ -176,9 +176,9 @@ export default function ChatInterface({ className = '' }: ChatInterfaceProps) {
         <div className="px-4 py-2 bg-gray-50 border-t">
           <p className="text-xs text-gray-600 mb-2">Suggestions:</p>
           <div className="flex flex-wrap gap-2">
-            {suggestions.map((suggestion, index) => (
+            {suggestions.map((suggestion) => (
               <button
-                key={index}
+                key={suggestion}
                 onClick={() => useSuggestion(suggestion)}
                 className="px-3 py-1 text-sm bg-white border border-gray-300 rounded-full hover:bg-gray-100 transition"
               >

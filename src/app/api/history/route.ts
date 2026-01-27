@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withApiSecurity, validatePagination } from '@/lib/api/security';
 
 // Generate mock history data
 function generateMockHistory() {
@@ -135,14 +136,20 @@ function generateMockHistory() {
   return entries;
 }
 
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest, _context: { user?: { userId: string; email: string } }) {
+  // Note: user available via _context.user for filtering by userId in production
   try {
     const searchParams = request.nextUrl.searchParams;
     const typeParam = searchParams.get('type') || 'meals';
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
 
-    // Generate mock data
+    // Validate pagination with bounds (max 100 entries)
+    const { limit, offset } = validatePagination(
+      searchParams.get('limit'),
+      searchParams.get('offset'),
+      100
+    );
+
+    // Generate mock data - in production, fetch from database using user.userId
     let allEntries = generateMockHistory();
 
     // Filter by type (handle plural forms from frontend)
@@ -177,3 +184,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export const GET = withApiSecurity(handler, { requireAuth: true });

@@ -89,9 +89,10 @@ test.describe('Complete Onboarding Wizard Flow', () => {
     await expect(page.locator('h1')).toContainText('All Set');
     console.log('✅ 11. Step 3 page loaded');
 
-    // Verify summary shows correct data
-    await expect(page.locator('.summary-value')).toContainText('35 years');
-    await expect(page.locator('.summary-value')).toContainText('75 kg');
+    // Verify summary shows correct data (use filter to avoid strict mode violation)
+    const summaryValues = page.locator('.summary-value');
+    await expect(summaryValues.filter({ hasText: '35 years' })).toBeVisible();
+    await expect(summaryValues.filter({ hasText: '75 kg' })).toBeVisible();
     console.log('✅ 12. Summary displays correct information');
 
     // Click Complete Setup and wait for navigation
@@ -155,6 +156,11 @@ test.describe('Complete Onboarding Wizard Flow', () => {
       page.click('button.btn-secondary')
     ]);
     console.log('✅ Back button works: Step 2 → Step 1');
+
+    // Re-fill Step 1 form (component doesn't pre-fill from localStorage)
+    await page.fill('input[name="age"]', '30');
+    await page.fill('input[name="weight"]', '70');
+    await page.selectOption('select[name="diabetesType"]', 'type2');
 
     // Go forward again
     await Promise.all([

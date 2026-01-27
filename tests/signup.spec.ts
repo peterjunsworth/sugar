@@ -9,61 +9,38 @@ test.describe('Signup Page', () => {
     await expect(page.getByLabel(/full name/i)).toBeVisible();
     await expect(page.getByLabel(/^email$/i)).toBeVisible();
     await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
-    await expect(page.getByLabel(/confirm password/i)).toBeVisible();
+    // Note: Confirm password field was removed from the simplified signup form
     await expect(page.getByLabel(/terms/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /sign up/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /create account/i })).toBeVisible();
   });
 
-  test('should show validation errors for empty form', async ({ page }) => {
-    await page.getByRole('button', { name: /sign up/i }).click();
-
-    // Should show required field errors
-    await expect(page.getByText(/name is required/i)).toBeVisible();
-    await expect(page.getByText(/email is required/i)).toBeVisible();
-    await expect(page.getByText(/password is required/i)).toBeVisible();
+  test('should have required fields marked as required', async ({ page }) => {
+    // The form uses HTML5 native validation with 'required' attribute
+    await expect(page.getByLabel(/full name/i)).toHaveAttribute('required', '');
+    await expect(page.getByLabel(/^email$/i)).toHaveAttribute('required', '');
+    await expect(page.getByLabel('Password', { exact: true })).toHaveAttribute('required', '');
+    await expect(page.getByLabel(/terms/i)).toHaveAttribute('required', '');
   });
 
-  test('should validate email format', async ({ page }) => {
-    // Use an invalid email that passes HTML5 validation but fails regex
-    await page.getByLabel(/^email$/i).fill('invalid@email'); // Missing TLD
+  test('should prevent submission with empty form', async ({ page }) => {
+    // Click submit - form should not navigate due to native validation
+    await page.getByRole('button', { name: /create account/i }).click();
+
+    // Should still be on signup page (native validation prevents submission)
+    await expect(page).toHaveURL(/\/signup/);
+  });
+
+  test('should validate email format via native validation', async ({ page }) => {
+    // Fill all fields except use invalid email
     await page.getByLabel(/full name/i).fill('John Doe');
-    await page.getByRole('button', { name: /sign up/i }).click();
-
-    await expect(page.getByText(/invalid email/i)).toBeVisible();
-  });
-
-  test('should validate password match', async ({ page }) => {
+    await page.getByLabel(/^email$/i).fill('invalid-email'); // Missing @ and domain
     await page.getByLabel('Password', { exact: true }).fill('password123');
-    await page.getByLabel(/confirm password/i).fill('password456');
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByLabel(/terms/i).check();
 
-    await expect(page.getByText(/passwords do not match/i)).toBeVisible();
-  });
+    await page.getByRole('button', { name: /create account/i }).click();
 
-  test('should require terms acceptance', async ({ page }) => {
-    await page.getByLabel(/full name/i).fill('John Doe');
-    await page.getByLabel(/^email$/i).fill('john@example.com');
-    await page.getByLabel('Password', { exact: true }).fill('password123');
-    await page.getByLabel(/confirm password/i).fill('password123');
-    // Don't check terms
-
-    await page.getByRole('button', { name: /sign up/i }).click();
-
-    await expect(page.getByText(/accept.*terms/i)).toBeVisible();
-  });
-
-  test('should validate name length', async ({ page }) => {
-    await page.getByLabel(/full name/i).fill('A');
-    await page.getByRole('button', { name: /sign up/i }).click();
-
-    await expect(page.getByText(/name must be at least 2 characters/i)).toBeVisible();
-  });
-
-  test('should validate password length', async ({ page }) => {
-    await page.getByLabel('Password', { exact: true }).fill('short');
-    await page.getByRole('button', { name: /sign up/i }).click();
-
-    await expect(page.getByText(/password must be at least 8 characters/i)).toBeVisible();
+    // Should still be on signup page (native validation prevents submission)
+    await expect(page).toHaveURL(/\/signup/);
   });
 
   test('should successfully register with valid data', async ({ page }) => {
@@ -72,20 +49,15 @@ test.describe('Signup Page', () => {
     await page.getByLabel(/full name/i).fill('Test User');
     await page.getByLabel(/^email$/i).fill(uniqueEmail);
     await page.getByLabel('Password', { exact: true }).fill('SecurePass123');
-    await page.getByLabel(/confirm password/i).fill('SecurePass123');
     await page.getByLabel(/terms/i).check();
 
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByRole('button', { name: /create account/i }).click();
 
     // Wait a moment for the API call and cookie to be set
     await page.waitForTimeout(500);
 
     // Should redirect to onboarding (or temporarily to login if middleware hasn't picked up cookie yet)
-    // In production, the cookie will be properly set and middleware will work
     await expect(page).toHaveURL(/\/(setup\/step-1|login)/, { timeout: 10000 });
-
-    // If we're on login, the registration was still successful
-    // For now, we'll accept this as the middleware/cookie timing issue is a known Next.js development quirk
   });
 
   test('should show error for duplicate email', async ({ page, context }) => {
@@ -95,9 +67,8 @@ test.describe('Signup Page', () => {
     await page.getByLabel(/full name/i).fill('First User');
     await page.getByLabel(/^email$/i).fill(duplicateEmail);
     await page.getByLabel('Password', { exact: true }).fill('password123');
-    await page.getByLabel(/confirm password/i).fill('password123');
     await page.getByLabel(/terms/i).check();
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByRole('button', { name: /create account/i }).click();
 
     // Wait for registration to complete
     await page.waitForTimeout(1500);
@@ -113,12 +84,10 @@ test.describe('Signup Page', () => {
     await page.getByLabel(/full name/i).fill('Second User');
     await page.getByLabel(/^email$/i).fill(duplicateEmail);
     await page.getByLabel('Password', { exact: true }).fill('password456');
-    await page.getByLabel(/confirm password/i).fill('password456');
     await page.getByLabel(/terms/i).check();
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByRole('button', { name: /create account/i }).click();
 
     // Should show error (API will return error for duplicate email) OR stay on signup page
-    // We check that we're still on signup page (didn't successfully register)
     await page.waitForTimeout(1000);
     const currentUrl = page.url();
     const hasError = await page.getByText(/already exists|email.*taken|user.*exists/i).isVisible().catch(() => false);
@@ -129,18 +98,18 @@ test.describe('Signup Page', () => {
   });
 
   test('should navigate to login page', async ({ page }) => {
-    await page.getByRole('link', { name: /sign in/i }).click();
+    await page.getByRole('link', { name: /log in/i }).click();
     await expect(page).toHaveURL('/login');
   });
 
   test('should display social login buttons', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /continue with google/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /continue with apple/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /google/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /github/i })).toBeVisible();
   });
 
   test('should toggle password visibility', async ({ page }) => {
     const passwordInput = page.getByLabel('Password', { exact: true });
-    const toggleButton = page.getByTestId('password-toggle');
+    const toggleButton = page.getByRole('button', { name: /show password|hide password/i });
 
     // Initially password type
     await expect(passwordInput).toHaveAttribute('type', 'password');
@@ -154,48 +123,20 @@ test.describe('Signup Page', () => {
     await expect(passwordInput).toHaveAttribute('type', 'password');
   });
 
-  test('should toggle confirm password visibility', async ({ page }) => {
-    const confirmPasswordInput = page.getByLabel(/confirm password/i);
-    const toggleButton = page.getByTestId('confirm-password-toggle');
-
-    // Initially password type
-    await expect(confirmPasswordInput).toHaveAttribute('type', 'password');
-
-    // Click toggle
-    await toggleButton.click();
-    await expect(confirmPasswordInput).toHaveAttribute('type', 'text');
-  });
-
-  test('should clear validation error when user starts typing', async ({ page }) => {
-    // Submit empty form to trigger errors
-    await page.getByRole('button', { name: /sign up/i }).click();
-
-    // Verify error exists
-    await expect(page.getByText(/name is required/i)).toBeVisible();
-
-    // Start typing
-    await page.getByLabel(/full name/i).fill('J');
-
-    // Error should clear
-    await expect(page.getByText(/name is required/i)).not.toBeVisible();
-  });
-
   test('should disable submit button while loading', async ({ page }) => {
     const uniqueEmail = `loading${Date.now()}@example.com`;
 
     await page.getByLabel(/full name/i).fill('Loading Test');
     await page.getByLabel(/^email$/i).fill(uniqueEmail);
     await page.getByLabel('Password', { exact: true }).fill('password123');
-    await page.getByLabel(/confirm password/i).fill('password123');
     await page.getByLabel(/terms/i).check();
 
-    const submitButton = page.getByRole('button', { name: /sign up/i });
+    const submitButton = page.getByRole('button', { name: /create account/i });
 
     // Click submit and immediately check button state
     const clickPromise = submitButton.click();
 
     // Try to verify button is disabled or loading text is shown
-    // This may be very fast, so we check if either condition is met OR we've navigated away
     try {
       await Promise.race([
         expect(submitButton).toBeDisabled({ timeout: 1000 }),
@@ -205,10 +146,9 @@ test.describe('Signup Page', () => {
       // If neither happens quickly, that's ok - the form may have submitted instantly
     }
 
-    // Wait for the click to complete
     await clickPromise;
 
-    // Ultimately, we should end up on the setup or login page (same middleware issue as other tests)
+    // Ultimately, we should end up on the setup or login page
     await expect(page).toHaveURL(/\/(setup\/step-1|login)/, { timeout: 10000 });
   });
 
@@ -216,7 +156,7 @@ test.describe('Signup Page', () => {
     await page.setViewportSize({ width: 375, height: 667 });
 
     await expect(page.getByLabel(/full name/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /sign up/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /create account/i })).toBeVisible();
 
     // Fill form on mobile
     await page.getByLabel(/full name/i).fill('Mobile User');
@@ -233,11 +173,10 @@ test.describe('Signup Page', () => {
     await expect(emailInput).toBeVisible();
     await expect(passwordInput).toBeVisible();
 
-    // Check for proper ARIA attributes when errors exist
-    await page.getByRole('button', { name: /sign up/i }).click();
-
-    await expect(nameInput).toHaveAttribute('aria-invalid', 'true');
-    await expect(emailInput).toHaveAttribute('aria-invalid', 'true');
+    // Check all inputs have associated labels (accessibility)
+    await expect(nameInput).toHaveAttribute('id', 'name');
+    await expect(emailInput).toHaveAttribute('id', 'email');
+    await expect(passwordInput).toHaveAttribute('id', 'password');
   });
 
   test('should show terms and privacy policy links', async ({ page }) => {

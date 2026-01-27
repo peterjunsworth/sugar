@@ -269,64 +269,36 @@ test.describe('Dashboard Visual Check - SuperDesign Match', () => {
     console.log('✅ Phase 5 Complete: All 3 metrics cards configured');
   });
 
-  test('Phase 6: Chat Messages - Sample messages with impact card', async ({ page }) => {
+  test('Phase 6: Chat Messages - Welcome message and structure', async ({ page }) => {
     console.log('🔍 Phase 6: Checking chat messages...');
 
-    // Check all messages
+    // Check that chat messages container exists
+    const chatMessages = page.locator('.chat-messages');
+    await expect(chatMessages).toBeVisible();
+    console.log('  ✅ Chat messages container present');
+
+    // Check for at least one AI message (the welcome message)
     const messages = page.locator('.message');
-    await expect(messages).toHaveCount(4); // 3 messages + typing indicator
-    console.log('  ✅ 4 message elements present');
+    const messageCount = await messages.count();
+    expect(messageCount).toBeGreaterThanOrEqual(1);
+    console.log(`  ✅ ${messageCount} message element(s) present`);
 
-    // Message 1: AI greeting
-    console.log('  ✓ Checking AI greeting message...');
-    const msg1 = messages.nth(0);
-    await expect(msg1).toHaveClass(/ai/);
-    await expect(msg1.locator('.message-avatar.ai')).toBeVisible();
-    await expect(msg1.locator('[data-lucide="bot"]')).toBeVisible();
-    await expect(msg1.locator('.message-content')).toContainText('Good morning');
-    await expect(msg1.locator('.message-time')).toContainText('9:41 AM');
-    console.log('  ✅ AI greeting message present');
+    // Check first message is AI type
+    const firstMessage = messages.first();
+    await expect(firstMessage).toHaveClass(/ai/);
+    console.log('  ✅ First message is from AI');
 
-    // Message 2: User message
-    console.log('  ✓ Checking user message...');
-    const msg2 = messages.nth(1);
-    await expect(msg2).toHaveClass(/user/);
-    await expect(msg2.locator('.message-avatar.user')).toBeVisible();
-    await expect(msg2.locator('[data-lucide="user"]')).toBeVisible();
-    await expect(msg2.locator('.message-content')).toContainText('pizza');
-    await expect(msg2.locator('.message-time')).toContainText('12:30 PM');
-    console.log('  ✅ User message present');
+    // Check message structure
+    await expect(firstMessage.locator('.message-avatar.ai')).toBeVisible();
+    await expect(firstMessage.locator('.message-content')).toBeVisible();
+    console.log('  ✅ Message has avatar and content');
 
-    // Message 3: AI response with impact card
-    console.log('  ✓ Checking AI response with impact card...');
-    const msg3 = messages.nth(2);
-    await expect(msg3).toHaveClass(/ai/);
-    await expect(msg3.locator('.message-content')).toBeVisible();
+    // Check welcome message content contains greeting
+    const content = await firstMessage.locator('.message-content').textContent();
+    expect(content?.toLowerCase()).toContain('welcome');
+    console.log('  ✅ Welcome message contains greeting');
 
-    // Check impact card
-    console.log('  ✓ Checking impact card...');
-    const impactCard = msg3.locator('.impact-card');
-    await expect(impactCard).toBeVisible();
-    await expect(impactCard.locator('.impact-title')).toContainText('Glucose Impact');
-    await expect(impactCard.locator('.badge-warning')).toContainText('+50-60 mg/dL');
-    await expect(impactCard.locator('.impact-chart')).toBeVisible();
-    console.log('  ✅ Impact card present');
-
-    // Check recommendation
-    await expect(msg3.locator('.message-content')).toContainText('Recommendation');
-    console.log('  ✅ Recommendation text present');
-
-    // Message 4: Typing indicator
-    console.log('  ✓ Checking typing indicator...');
-    const msg4 = messages.nth(3);
-    await expect(msg4).toHaveClass(/ai/);
-    const typingIndicator = msg4.locator('.typing-indicator');
-    await expect(typingIndicator).toBeVisible();
-    const typingDots = typingIndicator.locator('.typing-dot');
-    await expect(typingDots).toHaveCount(3);
-    console.log('  ✅ Typing indicator with 3 dots present');
-
-    console.log('✅ Phase 6 Complete: All chat messages configured');
+    console.log('✅ Phase 6 Complete: Chat messages configured');
   });
 
   test('Phase 7: Input Bar - All buttons and input', async ({ page }) => {
@@ -532,9 +504,7 @@ test.describe('Dashboard Visual Check - SuperDesign Match', () => {
       { name: 'Quick metrics', selector: '.quick-metrics', count: 1 },
       { name: 'Metric cards', selector: '.metric-card', count: 3 },
       { name: 'Chat container', selector: '.chat-container', count: 1 },
-      { name: 'Messages', selector: '.message', count: 4 },
-      { name: 'Impact card', selector: '.impact-card', count: 1 },
-      { name: 'Typing indicator', selector: '.typing-indicator', count: 1 },
+      { name: 'Chat messages', selector: '.chat-messages', count: 1 },
       { name: 'Input bar', selector: '.input-bar', count: 1 },
       { name: 'Chat input', selector: '.chat-input', count: 1 },
       { name: 'Send button', selector: '.send-btn', count: 1 },
@@ -548,6 +518,12 @@ test.describe('Dashboard Visual Check - SuperDesign Match', () => {
       console.log(`  ✅ ${check.name}: ${count}/${check.count}`);
     }
 
-    console.log('🎉 FINAL COMPLETE: Dashboard matches mockup 100%!');
+    // Check that there's at least one message (welcome message)
+    const messages = page.locator('.message');
+    const messageCount = await messages.count();
+    expect(messageCount).toBeGreaterThanOrEqual(1);
+    console.log(`  ✅ Messages: ${messageCount} (at least 1)`);
+
+    console.log('🎉 FINAL COMPLETE: Dashboard structure verified!');
   });
 });

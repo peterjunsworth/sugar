@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.use({
+  launchOptions: { slowMo: 500 },
   headless: false,
-  slowMo: 500,
 });
 
 // Increase test timeout for slow signup process

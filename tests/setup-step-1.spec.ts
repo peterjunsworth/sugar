@@ -6,158 +6,167 @@ test.describe('Setup Wizard Step 1', () => {
     await page.goto('/signup');
     const testEmail = `setuptest${Date.now()}@example.com`;
 
+    // Fill signup form - actual signup page has: name, email, password (no confirm), terms
     await page.getByLabel(/full name/i).fill('Setup Test User');
     await page.getByLabel(/email/i).fill(testEmail);
     await page.getByLabel('Password', { exact: true }).fill('password123');
-    await page.getByLabel(/confirm password/i).fill('password123');
-    await page.getByLabel(/terms/i).check();
+    await page.locator('#terms').check();
 
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByRole('button', { name: /create account/i }).click();
 
-    // Wait for redirect to setup page
-    await page.waitForURL('/setup/step-1', { timeout: 10000 });
+    // Wait for redirect to setup page - the signup page uses window.location.href so we wait for URL
+    await page.waitForURL('/setup/step-1', { timeout: 15000 });
     await page.waitForLoadState('networkidle');
-
-    // Verify we're on the setup page
-    console.log('Final URL:', page.url());
-    const title = await page.title().catch(() => 'no title');
-    console.log('Page title:', title);
   });
 
   test('should render all form sections', async ({ page }) => {
-    await expect(page.getByText(/personalize your experience/i)).toBeVisible();
-    await expect(page.getByLabel(/age/i)).toBeVisible();
-    await expect(page.getByLabel(/weight/i)).toBeVisible();
-    await expect(page.getByText(/type 1 diabetes/i)).toBeVisible();
-    await expect(page.getByText(/type 2 diabetes/i)).toBeVisible();
+    // Title says "Tell Us About You"
+    await expect(page.getByRole('heading', { name: /tell us about you/i })).toBeVisible();
+
+    // Has Age, Weight fields
+    await expect(page.getByText('Age')).toBeVisible();
+    await expect(page.getByText(/Weight/i)).toBeVisible();
+
+    // Has Diabetes Type dropdown with options
+    await expect(page.getByText('Diabetes Type')).toBeVisible();
+    const diabetesSelect = page.locator('select[name="diabetesType"]');
+    await expect(diabetesSelect).toBeVisible();
   });
 
   test('should show progress indicator', async ({ page }) => {
-    await expect(page.getByText(/1.*\/.*3/)).toBeVisible();
+    // Progress is shown as 3 dots with the first one active
+    const progressSteps = page.locator('.progress-steps');
+    await expect(progressSteps).toBeVisible();
+
+    // First step dot should be active
+    const activeDot = page.locator('.step-dot.active');
+    await expect(activeDot).toBeVisible();
   });
 
-  test('should validate age input', async ({ page }) => {
-    await page.getByRole('button', { name: /next/i }).click();
-    await expect(page.getByText(/valid age/i)).toBeVisible();
+  test('should validate required fields on submit', async ({ page }) => {
+    // Try to submit without filling required fields
+    await page.getByRole('button', { name: /continue/i }).click();
+
+    // HTML5 validation should prevent submission - check that we're still on step-1
+    await expect(page).toHaveURL(/step-1/);
   });
 
-  test('should validate weight input', async ({ page }) => {
-    await page.getByRole('button', { name: /next/i }).click();
-    await expect(page.getByText(/valid weight/i)).toBeVisible();
+  test('should fill age input', async ({ page }) => {
+    const ageInput = page.locator('input[name="age"]');
+    await ageInput.fill('30');
+    await expect(ageInput).toHaveValue('30');
   });
 
-  test('should require diabetes type selection', async ({ page }) => {
-    await page.getByLabel(/age/i).fill('30');
-    await page.getByLabel(/weight/i).fill('150');
-    await page.getByRole('button', { name: /next/i }).click();
-
-    await expect(page.getByText(/select.*diabetes type/i)).toBeVisible();
+  test('should fill weight input', async ({ page }) => {
+    const weightInput = page.locator('input[name="weight"]');
+    await weightInput.fill('70');
+    await expect(weightInput).toHaveValue('70');
   });
 
-  test('should toggle weight unit', async ({ page }) => {
-    const kgButton = page.getByRole('button', { name: /^kg$/i });
-    const lbsButton = page.getByRole('button', { name: /^lbs$/i });
+  test('should select diabetes type from dropdown', async ({ page }) => {
+    const diabetesSelect = page.locator('select[name="diabetesType"]');
 
-    // Should start with lbs selected (default)
-    await expect(lbsButton).toBeVisible();
-    await expect(kgButton).toBeVisible();
+    // Select Type 1 Diabetes
+    await diabetesSelect.selectOption('type1');
+    await expect(diabetesSelect).toHaveValue('type1');
 
-    await kgButton.click();
-    // After clicking, kg should be selected
+    // Select Type 2 Diabetes
+    await diabetesSelect.selectOption('type2');
+    await expect(diabetesSelect).toHaveValue('type2');
   });
 
-  test('should select diabetes type', async ({ page }) => {
-    const type1Card = page.locator('[data-testid="diabetes-type-type1"]');
-    await type1Card.click();
+  test('should have default glucose targets', async ({ page }) => {
+    const minInput = page.locator('input[name="targetMin"]');
+    const maxInput = page.locator('input[name="targetMax"]');
 
-    // Should show visual selection state (check icon or border change)
-    await expect(type1Card).toBeVisible();
+    await expect(minInput).toHaveValue('70');
+    await expect(maxInput).toHaveValue('180');
   });
 
-  test('should validate glucose targets', async ({ page }) => {
-    await page.getByLabel(/age/i).fill('30');
-    await page.getByLabel(/weight/i).fill('150');
-    await page.locator('[data-testid="diabetes-type-type1"]').click();
+  test('should allow editing glucose targets', async ({ page }) => {
+    const minInput = page.locator('input[name="targetMin"]');
+    const maxInput = page.locator('input[name="targetMax"]');
 
-    // Clear glucose targets
-    await page.getByLabel(/target.*low/i).clear();
-    await page.getByLabel(/target.*high/i).clear();
+    await minInput.fill('80');
+    await maxInput.fill('160');
 
-    await page.getByRole('button', { name: /next/i }).click();
-    await expect(page.getByText(/glucose targets/i)).toBeVisible();
-  });
-
-  test('should validate low < high glucose targets', async ({ page }) => {
-    await page.getByLabel(/age/i).fill('30');
-    await page.getByLabel(/weight/i).fill('150');
-    await page.locator('[data-testid="diabetes-type-type1"]').click();
-
-    await page.getByLabel(/target.*low/i).fill('180');
-    await page.getByLabel(/target.*high/i).fill('70');
-
-    await page.getByRole('button', { name: /next/i }).click();
-    await expect(page.getByText(/low.*less than.*high/i)).toBeVisible();
+    await expect(minInput).toHaveValue('80');
+    await expect(maxInput).toHaveValue('160');
   });
 
   test('should proceed to step 2 with valid data', async ({ page }) => {
-    await page.getByLabel(/age/i).fill('30');
-    await page.getByLabel(/weight/i).fill('150');
-    await page.locator('[data-testid="diabetes-type-type1"]').click();
-    await page.getByLabel(/target.*low/i).fill('70');
-    await page.getByLabel(/target.*high/i).fill('180');
+    // Fill all required fields
+    await page.locator('input[name="age"]').fill('30');
+    await page.locator('input[name="weight"]').fill('70');
+    await page.locator('select[name="diabetesType"]').selectOption('type1');
 
-    await page.getByRole('button', { name: /next/i }).click();
+    // Targets already have default values (70, 180)
+
+    await page.getByRole('button', { name: /continue/i }).click();
 
     await expect(page).toHaveURL('/setup/step-2', { timeout: 5000 });
   });
 
-  test('should toggle glucose unit', async ({ page }) => {
-    const mgdlButton = page.getByRole('button', { name: /mg\/dl/i });
-    const mmolButton = page.getByRole('button', { name: /mmol\/l/i });
-
-    await expect(mgdlButton).toBeVisible();
-    await expect(mmolButton).toBeVisible();
-
-    await mmolButton.click();
-    // Values should convert (e.g., 70 mg/dL → ~4 mmol/L)
-  });
-
-  test('should have default glucose targets', async ({ page }) => {
-    const lowInput = page.getByLabel(/target.*low/i);
-    const highInput = page.getByLabel(/target.*high/i);
-
-    await expect(lowInput).toHaveValue('70');
-    await expect(highInput).toHaveValue('180');
-  });
-
   test('should be responsive on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await expect(page.getByText(/personalize/i)).toBeVisible();
-    await expect(page.getByLabel(/age/i)).toBeVisible();
+
+    // Title and form should still be visible
+    await expect(page.getByRole('heading', { name: /tell us about you/i })).toBeVisible();
+    await expect(page.locator('input[name="age"]')).toBeVisible();
   });
 
-  test('should work in dark mode', async ({ page }) => {
-    const html = page.locator('html');
-    const themeToggle = page.locator('[data-testid="theme-toggle"]');
+  test('should have back button that goes to welcome', async ({ page }) => {
+    // There are two back buttons - one in header (arrow icon) and one in footer (with text)
+    const footerBackButton = page.locator('.btn-secondary').filter({ hasText: /back/i });
+    await expect(footerBackButton).toBeVisible();
 
-    if (await themeToggle.isVisible()) {
-      await themeToggle.click();
-    }
-
-    // Check if dark mode class is applied
-    const classes = await html.getAttribute('class');
-    if (classes?.includes('dark')) {
-      await expect(html).toHaveClass(/dark/);
-    }
-
-    await expect(page.getByLabel(/age/i)).toBeVisible();
-  });
-
-  test('should have back button', async ({ page }) => {
-    const backButton = page.getByRole('button', { name: /back/i });
-    await expect(backButton).toBeVisible();
-
-    await backButton.click();
+    await footerBackButton.click();
     await expect(page).toHaveURL('/welcome');
+  });
+
+  test('should have skip link', async ({ page }) => {
+    const skipLink = page.locator('.skip-btn');
+    await expect(skipLink).toBeVisible();
+    await expect(skipLink).toHaveText('Skip');
+  });
+
+  test('should show diabetes type options in dropdown', async ({ page }) => {
+    const diabetesSelect = page.locator('select[name="diabetesType"]');
+
+    // Check that the dropdown has the expected options
+    const options = diabetesSelect.locator('option');
+    await expect(options).toHaveCount(6); // "Select type" + 5 diabetes types
+
+    // Verify option values
+    await expect(diabetesSelect.locator('option[value="type1"]')).toHaveText('Type 1 Diabetes');
+    await expect(diabetesSelect.locator('option[value="type2"]')).toHaveText('Type 2 Diabetes');
+    await expect(diabetesSelect.locator('option[value="prediabetes"]')).toHaveText('Prediabetes');
+    await expect(diabetesSelect.locator('option[value="gestational"]')).toHaveText('Gestational Diabetes');
+    await expect(diabetesSelect.locator('option[value="other"]')).toHaveText('Other / Not Sure');
+  });
+
+  test('should save form data to localStorage on submit', async ({ page }) => {
+    // Fill all required fields
+    await page.locator('input[name="age"]').fill('35');
+    await page.locator('input[name="weight"]').fill('75');
+    await page.locator('select[name="diabetesType"]').selectOption('type2');
+    await page.locator('input[name="targetMin"]').fill('80');
+    await page.locator('input[name="targetMax"]').fill('170');
+
+    await page.getByRole('button', { name: /continue/i }).click();
+
+    // Wait for navigation
+    await page.waitForURL('/setup/step-2', { timeout: 5000 });
+
+    // Check localStorage was updated
+    const storedData = await page.evaluate(() => localStorage.getItem('setupStep1Data'));
+    expect(storedData).not.toBeNull();
+
+    const parsedData = JSON.parse(storedData as string);
+    expect(parsedData.age).toBe('35');
+    expect(parsedData.weight).toBe('75');
+    expect(parsedData.diabetesType).toBe('type2');
+    expect(parsedData.targetMin).toBe('80');
+    expect(parsedData.targetMax).toBe('170');
   });
 });

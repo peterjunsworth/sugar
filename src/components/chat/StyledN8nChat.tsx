@@ -28,8 +28,11 @@ export default function StyledN8nChat({ className = '' }: StyledN8nChatProps) {
       // We'll use fetch API directly instead of N8n UI component
       // This avoids N8n creating duplicate inputs
       const sendToN8n = async (message: string) => {
-        const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL ||
-                          'https://peterjunsworth.app.n8n.cloud/webhook/5e29cdc8-0dfa-469e-992e-c7568f3d0b68/chat';
+        const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
+
+        if (!webhookUrl) {
+          return 'Chat service not configured. Please set NEXT_PUBLIC_N8N_WEBHOOK_URL.';
+        }
 
         try {
           const response = await fetch(webhookUrl, {

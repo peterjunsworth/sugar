@@ -1,9 +1,12 @@
 import { test } from '@playwright/test';
 
 test.use({
+  launchOptions: { slowMo: 500 },
   headless: false,
-  slowMo: 1000,
 });
+
+// Increase test timeout to accommodate manual inspection
+test.setTimeout(70000);
 
 test('Compare Welcome page mockup vs implementation', async ({ page, context }) => {
   // Open mockup in first page

@@ -1,7 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { withApiSecurity } from '@/lib/api/security';
 
-export async function GET() {
-  // Mock meal data
+async function handler(_request: NextRequest, _context: { user?: { userId: string; email: string } }) {
+  // Note: user available via _context.user for filtering by userId in production
+  // Mock meal data - in production, fetch from database using user.userId
   const meals = [
     { name: 'Pizza', carbs: 60, impact: 45 },
     { name: 'Salad', carbs: 15, impact: 20 },
@@ -24,3 +26,5 @@ export async function GET() {
     hoursAgo,
   });
 }
+
+export const GET = withApiSecurity(handler, { requireAuth: true });

@@ -74,8 +74,8 @@ export default function QuickMetricsGrid() {
 
   return (
     <div className="quick-metrics">
-      {metrics.map((metric, index) => (
-        <div key={index} className="metric-card">
+      {metrics.map((metric) => (
+        <div key={metric.label} className="metric-card">
           <div className={`metric-icon ${metric.iconClass}`}>
             <i data-lucide={metric.icon} className="icon"></i>
           </div>

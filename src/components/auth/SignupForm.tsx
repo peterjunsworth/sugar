@@ -45,11 +45,11 @@ export function SignupForm() {
       newErrors.name = 'Name must be at least 2 characters';
     }
 
-    // Email validation
+    // Email validation - stricter RFC 5322 simplified pattern
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email';
+    } else if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
     }
 
     // Password validation
@@ -107,19 +107,13 @@ export function SignupForm() {
 
       const data = await response.json();
 
-      console.log('[SignupForm] Registration response:', data);
-
       // Save token to localStorage
       if (data.token) {
         localStorage.setItem('token', data.token);
-        console.log('[SignupForm] Token saved to localStorage:', data.token.substring(0, 20) + '...');
-      } else {
-        console.warn('[SignupForm] No token in response');
       }
 
       // Registration successful, redirect to onboarding
       // Use window.location for full page reload to ensure cookie is sent with request
-      console.log('[SignupForm] Redirecting to /setup/step-1');
       window.location.href = '/setup/step-1';
     } catch (error) {
       setErrors({ api: 'Network error. Please try again.' });

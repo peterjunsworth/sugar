@@ -40,11 +40,11 @@ export function LoginForm() {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Email validation
+    // Email validation - stricter RFC 5322 simplified pattern
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email';
+    } else if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
     }
 
     // Password validation

@@ -154,8 +154,8 @@ test.describe('Dashboard Page', () => {
     await expect(headerBar).toBeVisible();
     console.log('✅ Header bar is visible');
 
-    // Check for menu button
-    const menuBtn = page.locator('#menuBtn');
+    // Check for menu button (uses class and aria-label, not ID)
+    const menuBtn = page.locator('.header-btn[aria-label="Menu"]');
     await expect(menuBtn).toBeVisible();
     console.log('✅ Menu button visible');
 
@@ -166,12 +166,12 @@ test.describe('Dashboard Page', () => {
     console.log('✅ Title displayed: Sugar Tracker');
 
     // Check for notifications button
-    const notificationsBtn = page.locator('button[aria-label="Notifications"]');
+    const notificationsBtn = page.locator('.header-btn[aria-label="Notifications"]');
     await expect(notificationsBtn).toBeVisible();
     console.log('✅ Notifications button visible');
 
     // Check for theme toggle button
-    const themeToggle = page.locator('#headerThemeToggle');
+    const themeToggle = page.locator('.header-btn[aria-label="Toggle theme"]');
     await expect(themeToggle).toBeVisible();
     console.log('✅ Theme toggle button visible');
   });
@@ -180,18 +180,25 @@ test.describe('Dashboard Page', () => {
     console.log('\n🖱️  Testing Header Button Interactivity');
     console.log('---------------------------------------');
 
-    // Test menu button click
-    const menuBtn = page.locator('#menuBtn');
+    // Test menu button click (uses class and aria-label, not ID)
+    const menuBtn = page.locator('.header-btn[aria-label="Menu"]');
     await menuBtn.click();
     console.log('✅ Menu button is clickable');
 
+    // Close sidebar if it opened
+    const overlay = page.locator('.sidebar-overlay.active');
+    if (await overlay.count() > 0) {
+      await overlay.click();
+      await page.waitForTimeout(300);
+    }
+
     // Test notifications button click
-    const notificationsBtn = page.locator('button[aria-label="Notifications"]');
+    const notificationsBtn = page.locator('.header-btn[aria-label="Notifications"]');
     await notificationsBtn.click();
     console.log('✅ Notifications button is clickable');
 
     // Test theme toggle button click
-    const themeToggle = page.locator('#headerThemeToggle');
+    const themeToggle = page.locator('.header-btn[aria-label="Toggle theme"]');
     await themeToggle.click();
     console.log('✅ Theme toggle button is clickable');
 

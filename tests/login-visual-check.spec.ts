@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.use({
+  launchOptions: { slowMo: 500 },
   headless: false,
-  slowMo: 1000,
 });
 
 test('Login page visual check', async ({ page }) => {

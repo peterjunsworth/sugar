@@ -32,11 +32,10 @@ test.describe('Setup Step 1 - Diagnostics', () => {
     console.log('=== STEP 2: Fill signup form ===');
     console.log('✓ Using test email:', testEmail);
 
-    await page.getByLabel(/full name/i).fill('Diagnostic Test User');
-    await page.getByLabel(/email/i).fill(testEmail);
-    await page.getByLabel('Password', { exact: true }).fill('password123');
-    await page.getByLabel(/confirm password/i).fill('password123');
-    await page.getByLabel(/terms/i).check();
+    await page.getByPlaceholder('John Doe').fill('Diagnostic Test User');
+    await page.getByPlaceholder('john@example.com').fill(testEmail);
+    await page.getByPlaceholder('••••••••').fill('password123');
+    await page.locator('input[type="checkbox"]').check();
     console.log('✓ Form filled');
 
     // Check cookies before submit
@@ -49,7 +48,7 @@ test.describe('Setup Step 1 - Diagnostics', () => {
 
     // Submit form
     console.log('=== STEP 4: Submit signup form ===');
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.click('button[type="submit"]');
     console.log('✓ Signup button clicked');
 
     // Wait for navigation or error

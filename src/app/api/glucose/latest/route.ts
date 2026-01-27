@@ -1,7 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { withApiSecurity } from '@/lib/api/security';
 
-export async function GET() {
-  // Mock glucose data
+async function handler(_request: NextRequest, _context: { user?: { userId: string; email: string } }) {
+  // Note: user available via _context.user for filtering by userId in production
+  // Mock glucose data - in production, fetch from database using user.userId
   const glucoseValue = 70 + Math.random() * 110; // Random value between 70-180 mg/dL
   const trends = ['up', 'down', 'stable'];
   const trend = trends[Math.floor(Math.random() * trends.length)];
@@ -22,3 +24,5 @@ export async function GET() {
     source: 'dexcom',
   });
 }
+
+export const GET = withApiSecurity(handler, { requireAuth: true });
