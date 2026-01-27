@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup - Step 2 - Sugar Tracker</title>
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="./default_ui_theme.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .wizard-container {
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--background);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .wizard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-lg) var(--spacing-xl);
+    }
+
+    .back-btn {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 50%;
+      color: var(--foreground);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .back-btn:hover {
+      transform: scale(1.05);
+      background: var(--surface-hover);
+    }
+
+    .skip-btn {
+      color: var(--muted-foreground);
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .skip-btn:hover {
+      color: var(--primary);
+    }
+
+    /* Progress Steps */
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      padding: 0 var(--spacing-xl) var(--spacing-xl);
+    }
+
+    .step-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: var(--surface-border);
+      transition: all 0.3s;
+    }
+
+    .step-dot.active {
+      width: 2rem;
+      background: var(--primary);
+      border-radius: 1rem;
+    }
+
+    .step-dot.completed {
+      background: var(--primary);
+    }
+
+    /* Content */
+    .wizard-content {
+      flex: 1;
+      padding: var(--spacing-2xl) var(--spacing-xl);
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .wizard-icon {
+      width: 5rem;
+      height: 5rem;
+      background: linear-gradient(135deg, var(--p-primary-500), var(--p-primary-400));
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--spacing-xl);
+      box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+    }
+
+    .wizard-title {
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      color: var(--foreground);
+      text-align: center;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .wizard-description {
+      font-size: var(--font-size-base);
+      color: var(--muted-foreground);
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    /* Device Cards */
+    .device-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .device-card {
+      background: var(--surface-card);
+      border: 2px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .device-card:hover {
+      background: var(--surface-hover);
+      transform: translateY(-2px);
+    }
+
+    .device-card.selected {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary), transparent 95%);
+    }
+
+    .device-icon-wrapper {
+      width: 3rem;
+      height: 3rem;
+      border-radius: calc(var(--radius) - 2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .device-icon-wrapper.dexcom {
+      background: linear-gradient(135deg, #4c9aff, #0065ff);
+    }
+
+    .device-icon-wrapper.libre {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    }
+
+    .device-icon-wrapper.manual {
+      background: linear-gradient(135deg, var(--accent-purple-400), var(--accent-purple-500));
+    }
+
+    .device-icon-wrapper.skip {
+      background: linear-gradient(135deg, #64748b, #475569);
+    }
+
+    .device-content {
+      flex: 1;
+    }
+
+    .device-name {
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: 2px;
+    }
+
+    .device-description {
+      font-size: var(--font-size-sm);
+      color: var(--muted-foreground);
+    }
+
+    .device-check {
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 2px solid var(--surface-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .device-card.selected .device-check {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .device-check i {
+      display: none;
+      color: white;
+    }
+
+    .device-card.selected .device-check i {
+      display: block;
+    }
+
+    /* Footer */
+    .wizard-footer {
+      padding: var(--spacing-xl);
+      border-top: 1px solid var(--surface-border);
+    }
+
+    .footer-buttons {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: var(--spacing-lg);
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      color: var(--foreground);
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      flex: 2;
+      padding: var(--spacing-lg);
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border: none;
+      border-radius: var(--radius);
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+    }
+
+    .btn-primary:hover {
+      background: var(--p-primary-600);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(20, 184, 166, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wizard-container">
+    <!-- Header -->
+    <div class="wizard-header">
+      <a href="setup_wizard_step_1.html" class="back-btn">
+        <i data-lucide="arrow-left" class="icon"></i>
+      </a>
+      <a href="welcome_1.html" class="skip-btn">Skip</a>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-steps">
+      <div class="step-dot completed"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="wizard-content">
+      <div class="wizard-icon">
+        <i data-lucide="watch" style="width: 2.5rem; height: 2.5rem; color: white;"></i>
+      </div>
+
+      <h1 class="wizard-title">Choose Your Device</h1>
+      <p class="wizard-description">
+        Select how you'd like to track your glucose levels. You can change this later.
+      </p>
+
+      <div class="device-grid">
+        <div class="device-card" data-device="dexcom">
+          <div class="device-icon-wrapper dexcom">
+            <i data-lucide="activity" style="width: 1.5rem; height: 1.5rem; color: white;"></i>
+          </div>
+          <div class="device-content">
+            <div class="device-name">Dexcom CGM</div>
+            <div class="device-description">Continuous Glucose Monitor</div>
+          </div>
+          <div class="device-check">
+            <i data-lucide="check" class="icon-sm"></i>
+          </div>
+        </div>
+
+        <div class="device-card" data-device="libre">
+          <div class="device-icon-wrapper libre">
+            <i data-lucide="zap" style="width: 1.5rem; height: 1.5rem; color: white;"></i>
+          </div>
+          <div class="device-content">
+            <div class="device-name">FreeStyle Libre</div>
+            <div class="device-description">Flash Glucose Monitor</div>
+          </div>
+          <div class="device-check">
+            <i data-lucide="check" class="icon-sm"></i>
+          </div>
+        </div>
+
+        <div class="device-card" data-device="manual">
+          <div class="device-icon-wrapper manual">
+            <i data-lucide="edit" style="width: 1.5rem; height: 1.5rem; color: white;"></i>
+          </div>
+          <div class="device-content">
+            <div class="device-name">Manual Entry</div>
+            <div class="device-description">Enter readings yourself</div>
+          </div>
+          <div class="device-check">
+            <i data-lucide="check" class="icon-sm"></i>
+          </div>
+        </div>
+
+        <div class="device-card" data-device="skip">
+          <div class="device-icon-wrapper skip">
+            <i data-lucide="arrow-right" style="width: 1.5rem; height: 1.5rem; color: white;"></i>
+          </div>
+          <div class="device-content">
+            <div class="device-name">Set Up Later</div>
+            <div class="device-description">I'll configure this later</div>
+          </div>
+          <div class="device-check">
+            <i data-lucide="check" class="icon-sm"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="wizard-footer">
+      <div class="footer-buttons">
+        <a href="setup_wizard_step_1.html" class="btn-secondary">
+          <i data-lucide="arrow-left" class="icon"></i>
+          <span>Back</span>
+        </a>
+        <button type="button" class="btn-primary" id="continueBtn" disabled>
+          <span>Continue</span>
+          <i data-lucide="arrow-right" class="icon"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Device selection
+    const deviceCards = document.querySelectorAll('.device-card');
+    const continueBtn = document.getElementById('continueBtn');
+    let selectedDevice = null;
+
+    deviceCards.forEach(card => {
+      card.addEventListener('click', function() {
+        // Remove previous selection
+        deviceCards.forEach(c => c.classList.remove('selected'));
+
+        // Add selection to clicked card
+        this.classList.add('selected');
+        selectedDevice = this.dataset.device;
+
+        // Enable continue button
+        continueBtn.disabled = false;
+
+        // Refresh icons
+        lucide.createIcons();
+      });
+    });
+
+    // Continue button
+    continueBtn.addEventListener('click', function() {
+      if (selectedDevice === 'skip') {
+        // Skip to welcome screen
+        window.location.href = 'welcome_1.html';
+      } else if (selectedDevice === 'manual') {
+        // Skip permissions for manual entry
+        window.location.href = 'welcome_1.html';
+      } else {
+        // Go to permissions screen for CGM devices
+        window.location.href = 'setup_wizard_step_1_2_3.html';
+      }
+    });
+  </script>
+</body>
+</html>

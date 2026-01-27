@@ -19,9 +19,19 @@ export default function IframeChatInterface({ className = '' }: IframeChatInterf
     );
   }
 
-  // Build the webhook URL with user metadata as query parameters
-  const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL ||
-                     'https://peterjunsworth.app.n8n.cloud/webhook/5e29cdc8-0dfa-469e-992e-c7568f3d0b68/chat';
+  // Build the webhook URL from environment variable (required)
+  const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
+
+  if (!webhookUrl) {
+    return (
+      <div className={`h-full w-full flex items-center justify-center ${className}`}>
+        <div className="text-center text-gray-500">
+          <p className="text-lg font-medium mb-2">Chat service not configured</p>
+          <p className="text-sm">Please set NEXT_PUBLIC_N8N_WEBHOOK_URL environment variable</p>
+        </div>
+      </div>
+    );
+  }
 
   // Add user info as query parameters
   const params = new URLSearchParams({

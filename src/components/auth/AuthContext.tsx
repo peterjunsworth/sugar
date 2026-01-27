@@ -8,6 +8,8 @@ interface User {
   email: string;
   name: string;
   cgmProvider?: 'dexcom' | 'libre' | 'eversense';
+  createdAt?: string;
+  lastLoginAt?: string;
 }
 
 interface AuthContextType {
@@ -31,7 +33,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
-      fetchUser(storedToken);
+      // Fetch user data with the stored token
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get('/api/auth/me', {
+            headers: { Authorization: `Bearer ${storedToken}` },
+          });
+          setUser(response.data.user);
+        } catch (error) {
+          localStorage.removeItem('token');
+          setToken(null);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchUserData();
     } else {
       setIsLoading(false);
     }

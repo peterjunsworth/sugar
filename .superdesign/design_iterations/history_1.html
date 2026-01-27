@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History - Sugar Tracker</title>
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="./default_ui_theme.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: var(--background);
+    }
+
+    /* Responsive Content Container */
+    .content-wrapper {
+      max-width: 100%;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Mobile: Full width */
+    @media (max-width: 767px) {
+      .content-wrapper {
+        max-width: 100%;
+      }
+    }
+
+    /* Tablet: 600px max */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .content-wrapper {
+        max-width: 600px;
+      }
+    }
+
+    /* Desktop: 900px max */
+    @media (min-width: 1024px) {
+      .content-wrapper {
+        max-width: 900px;
+      }
+    }
+
+    /* Header */
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) 0;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      min-height: 60px;
+      width: 100%;
+    }
+
+    .header-bar .content-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0 var(--spacing-lg);
+    }
+
+    @media (max-width: 767px) {
+      .header-bar .content-wrapper {
+        padding: 0 var(--spacing-lg);
+      }
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .header-btn {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      text-decoration: none;
+    }
+
+    .header-btn:hover {
+      background: var(--surface-hover);
+      color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .header-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    .header-right {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+
+    /* Tabs */
+    .tabs-container {
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      width: 100%;
+    }
+
+    .tab-list {
+      display: flex;
+      padding: 0;
+      gap: var(--spacing-sm);
+      overflow-x: auto;
+      scrollbar-width: none;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .tab-list {
+        max-width: 600px;
+        padding: 0 var(--spacing-lg);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .tab-list {
+        max-width: 900px;
+        padding: 0 var(--spacing-lg);
+      }
+    }
+
+    .tab-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted-foreground);
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--foreground);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Content */
+    .content-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--spacing-lg);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Date Header */
+    .date-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+      padding: var(--spacing-md) 0;
+    }
+
+    .date-text {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    .date-nav {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .date-nav-btn {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: calc(var(--radius) - 2px);
+      color: var(--foreground);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .date-nav-btn:hover {
+      background: var(--surface-hover);
+      transform: scale(1.05);
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: var(--spacing-xl);
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0.875rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--surface-border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -2.1rem;
+      top: 0.5rem;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      border: 2px solid var(--background);
+      z-index: 1;
+    }
+
+    .timeline-dot.meal {
+      background: var(--accent-coral-500);
+    }
+
+    .timeline-dot.glucose {
+      background: var(--p-primary-500);
+    }
+
+    .timeline-dot.exercise {
+      background: var(--accent-purple-500);
+    }
+
+    .timeline-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-lg);
+      transition: all 0.2s;
+    }
+
+    .timeline-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .timeline-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .timeline-time {
+      font-size: var(--font-size-xs);
+      color: var(--muted-foreground);
+    }
+
+    .timeline-title {
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .timeline-details {
+      font-size: var(--font-size-sm);
+      color: var(--muted-foreground);
+      line-height: 1.5;
+    }
+
+    .timeline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: 0.25rem var(--spacing-sm);
+      background: color-mix(in srgb, var(--primary), transparent 90%);
+      color: var(--primary);
+      border-radius: calc(var(--radius) - 4px);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      margin-top: var(--spacing-sm);
+    }
+
+    .timeline-badge.high {
+      background: color-mix(in srgb, var(--danger-red), transparent 90%);
+      color: var(--danger-red);
+    }
+
+    .timeline-badge.low {
+      background: color-mix(in srgb, var(--warning-amber), transparent 90%);
+      color: var(--warning-amber);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-3xl);
+    }
+
+    .empty-icon {
+      width: 4rem;
+      height: 4rem;
+      margin: 0 auto var(--spacing-lg);
+      color: var(--muted-foreground);
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .empty-description {
+      font-size: var(--font-size-sm);
+      color: var(--muted-foreground);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="header-bar">
+      <div class="content-wrapper">
+        <div class="header-left">
+          <a href="chat_interface_1.html" class="header-btn">
+            <i data-lucide="arrow-left" class="icon"></i>
+          </a>
+          <h1 class="header-title">History</h1>
+        </div>
+        <div class="header-right">
+          <button class="header-btn" id="themeToggle">
+            <i data-lucide="moon" class="icon" id="themeIcon"></i>
+          </button>
+          <button class="header-btn">
+            <i data-lucide="filter" class="icon"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <div class="tab-list">
+        <button class="tab-btn active" data-tab="meals">Meals</button>
+        <button class="tab-btn" data-tab="glucose">Glucose</button>
+        <button class="tab-btn" data-tab="exercise">Exercise</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content-container">
+      <div class="content-wrapper">
+      <!-- Date Header -->
+      <div class="date-header">
+        <div class="date-text">Today, Jan 22</div>
+        <div class="date-nav">
+          <button class="date-nav-btn">
+            <i data-lucide="chevron-left" class="icon-sm"></i>
+          </button>
+          <button class="date-nav-btn">
+            <i data-lucide="chevron-right" class="icon-sm"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Meals Tab -->
+      <div class="tab-content active" id="meals">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot meal"></div>
+            <div class="timeline-card">
+              <div class="timeline-header">
+                <div class="timeline-time">12:30 PM</div>
+              </div>
+              <div class="timeline-title">🍕 Pizza Lunch</div>
+              <div class="timeline-details">
+                2 slices pepperoni pizza, side salad
+              </div>
+              <div class="timeline-badge high">
+                <i data-lucide="trending-up" class="icon" style="width: 0.75rem; height: 0.75rem;"></i>
+                +50 mg/dL
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot meal"></div>
+            <div class="timeline-card">
+              <div class="timeline-header">
+                <div class="timeline-time">8:00 AM</div>
+              </div>
+              <div class="timeline-title">🥣 Oatmeal Breakfast</div>
+              <div class="timeline-details">
+                Oatmeal with berries, honey, and almonds
+              </div>
+              <div class="timeline-badge">
+                <i data-lucide="trending-up" class="icon" style="width: 0.75rem; height: 0.75rem;"></i>
+                +30 mg/dL
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Glucose Tab -->
+      <div class="tab-content" id="glucose">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot glucose"></div>
+            <div class="timeline-card">
+              <div class="timeline-header">
+                <div class="timeline-time">2:15 PM</div>
+              </div>
+              <div class="timeline-title">165 mg/dL</div>
+              <div class="timeline-details">
+                After lunch spike, within target range
+              </div>
+              <div class="timeline-badge">
+                <i data-lucide="check-circle" class="icon" style="width: 0.75rem; height: 0.75rem;"></i>
+                Healthy
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot glucose"></div>
+            <div class="timeline-card">
+              <div class="timeline-header">
+                <div class="timeline-time">12:15 PM</div>
+              </div>
+              <div class="timeline-title">115 mg/dL</div>
+              <div class="timeline-details">
+                Before lunch, stable reading
+              </div>
+              <div class="timeline-badge">
+                <i data-lucide="check-circle" class="icon" style="width: 0.75rem; height: 0.75rem;"></i>
+                Healthy
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot glucose"></div>
+            <div class="timeline-card">
+              <div class="timeline-header">
+                <div class="timeline-time">8:30 AM</div>
+              </div>
+              <div class="timeline-title">98 mg/dL</div>
+              <div class="timeline-details">
+                Morning reading, excellent control
+              </div>
+              <div class="timeline-badge">
+                <i data-lucide="check-circle" class="icon" style="width: 0.75rem; height: 0.75rem;"></i>
+                Healthy
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exercise Tab -->
+      <div class="tab-content" id="exercise">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot exercise"></div>
+            <div class="timeline-card">
+              <div class="timeline-header">
+                <div class="timeline-time">6:30 AM</div>
+              </div>
+              <div class="timeline-title">🏃‍♂️ Morning Run</div>
+              <div class="timeline-details">
+                30 minutes jogging, moderate intensity
+              </div>
+              <div class="timeline-badge low">
+                <i data-lucide="trending-down" class="icon" style="width: 0.75rem; height: 0.75rem;"></i>
+                -20 mg/dL
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <!-- End content-wrapper -->
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Tab switching
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const targetTab = this.dataset.tab;
+
+        // Update active tab button
+        tabBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        // Update active content
+        tabContents.forEach(content => {
+          if (content.id === targetTab) {
+            content.classList.add('active');
+          } else {
+            content.classList.remove('active');
+          }
+        });
+
+        // Refresh icons
+        lucide.createIcons();
+      });
+    });
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const html = document.documentElement;
+
+    themeToggle.addEventListener('click', function() {
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        themeIcon.setAttribute('data-lucide', 'sun');
+      } else {
+        html.classList.add('dark');
+        themeIcon.setAttribute('data-lucide', 'moon');
+      }
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
