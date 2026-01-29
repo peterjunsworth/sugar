@@ -125,7 +125,7 @@ export default function HistoryPage() {
             <i data-lucide="clock" className="nav-icon"></i>
             <span>History</span>
           </a>
-          <a href="#" className="nav-item">
+          <a href="/dashboard/profile" className="nav-item">
             <i data-lucide="user" className="nav-icon"></i>
             <span>Profile</span>
           </a>
